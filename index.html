@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>沐光畫室 | 線上畫廊</title>
+  <title>多功能網站 | 畫室報名 × LIVORO遊戲 × 英文學習</title>
   <style>
     :root {
       --bg: #f7f3ee;
@@ -498,18 +498,17 @@
   <header class="topbar">
     <div class="container topbar-inner">
       <div class="brand">
-        <div class="brand-mark">畫</div>
+        <div class="brand-mark">🎯</div>
         <div>
-          <div>沐光畫室</div>
-          <small class="muted">Muguang Studio</small>
+          <div>多功能網站</div>
+          <small class="muted">Multi-Function Site</small>
         </div>
       </div>
 
       <nav>
-        <a href="#about">關於畫室</a>
-        <a href="#courses">課程介紹</a>
-        <a href="#gallery">作品畫廊</a>
-        <a href="#member">會員登入</a>
+        <a href="#art-registration">畫室報名</a>
+        <a href="#livoro-game">LIVORO遊戲</a>
+        <a href="#english-learning">英文學習</a>
       </nav>
 
       <div class="actions">
@@ -520,58 +519,59 @@
   </header>
 
   <main>
-    <section class="hero" id="about">
+    <!-- 畫室報名功能 -->
+    <section class="hero" id="art-registration">
       <div class="container hero-grid">
         <article class="hero-card">
-          <div class="eyebrow">🎨 畫畫教學 × 作品展示 × 學員社群</div>
-          <h1>把畫室搬到線上，
-            讓學員登入、瀏覽作品、持續累積畫廊。</h1>
+          <div class="eyebrow">🎨 畫室報名系統</div>
+          <h1>線上報名美術課程，輕鬆開啟藝術之旅</h1>
           <p>
-            這是一個為畫室設計的單頁網站範本，包含 Google 帳號登入、作品畫廊展示、會員可新增作品資料的管理區。你可以先放到 GitHub Pages，之後再接 Firebase 正式上線。
+            提供完整的畫室課程報名功能，包含課程選擇、學員資料填寫、Google 帳號登入等功能。報名資料會儲存至 Firebase Firestore，方便管理與查詢。
           </p>
           <div class="form-actions">
-            <a class="btn btn-primary" href="#gallery">查看畫廊</a>
-            <a class="btn btn-secondary" href="#member">前往會員區</a>
+            <a class="btn btn-primary" href="#registration-form">立即報名</a>
+            <a class="btn btn-secondary" href="#courses">查看課程</a>
           </div>
           <div class="hero-stats">
             <div class="stat">
               <strong>3</strong>
-              <span class="muted">核心課程類型</span>
+              <span class="muted">課程類型</span>
+            </div>
+            <div class="stat">
+              <strong>線上</strong>
+              <span class="muted">即時報名</span>
             </div>
             <div class="stat">
               <strong>Google</strong>
-              <span class="muted">會員登入方式</span>
-            </div>
-            <div class="stat">
-              <strong>Gallery</strong>
-              <span class="muted">可持續新增作品</span>
+              <span class="muted">快速登入</span>
             </div>
           </div>
         </article>
 
         <aside class="hero-side">
           <div class="panel feature-card">
-            <h3>適合畫室的功能</h3>
+            <h3>報名系統功能</h3>
             <div class="feature-list">
-              <div class="feature-item">學員用 Google 帳號快速登入</div>
-              <div class="feature-item">管理者可新增作品標題、分類、圖片網址、介紹</div>
-              <div class="feature-item">畫廊自動從 Firebase Firestore 讀取資料</div>
+              <div class="feature-item">Google 帳號快速登入</div>
+              <div class="feature-item">線上填寫報名表單</div>
+              <div class="feature-item">即時儲存至資料庫</div>
             </div>
           </div>
           <div class="panel feature-card">
-            <h3>網站定位</h3>
-            <p class="muted">可作為畫室首頁、招生頁、學員作品牆，也可擴充成課表、報名表與作品收藏。</p>
+            <h3>適用對象</h3>
+            <p class="muted">適合各年齡層學員報名，從兒童創意繪畫到進階作品集課程，滿足不同需求。</p>
           </div>
         </aside>
       </div>
     </section>
 
+    <!-- 課程介紹 -->
     <section id="courses">
       <div class="container">
         <div class="section-head">
           <div>
             <h2>課程介紹</h2>
-            <p>先放三種常見課程區塊，之後你可以直接改文字與圖片，變成自己的畫室網站。</p>
+            <p>提供多元化的美術課程，從基礎到進階，培養藝術創作能力。</p>
           </div>
         </div>
 
@@ -594,7 +594,7 @@
             </div>
           </article>
 
-          <article class="panel course-card">
+          <article class="panel course-card"></article>
             <h3>作品集與個人風格</h3>
             <p>針對需要做作品集、比賽、申請學校或建立個人創作風格的學員規劃內容。</p>
             <div class="chip-row">
@@ -606,13 +606,14 @@
       </div>
     </section>
 
-    <section id="member">
+    <!-- 報名表單 -->
+    <section id="registration-form">
       <div class="container studio-layout">
         <article class="panel login-panel">
           <div class="section-head">
             <div>
-              <h2>會員登入</h2>
-              <p>用 Google 帳號登入後，就能進入會員狀態；你也可以把新增作品表單限制成只有管理者可用。</p>
+              <h2>課程報名</h2>
+              <p>請先使用 Google 帳號登入，然後填寫報名資料。</p>
             </div>
           </div>
 
@@ -628,54 +629,149 @@
                   <span id="userEmail" class="muted">member@example.com</span>
                 </div>
               </div>
-              <div class="hint">目前範例會顯示登入者資訊；如需限制為老師或管理員，建議再加 Firestore 權限規則。</div>
             </div>
           </div>
 
-          <form id="galleryForm">
-            <h3>新增畫廊作品</h3>
-            <input id="artTitle" type="text" placeholder="作品名稱" required />
-            <input id="artArtist" type="text" placeholder="作者名稱 / 學員名稱" required />
-            <select id="artCategory" required>
-              <option value="">選擇分類</option>
-              <option value="兒童創作">兒童創作</option>
-              <option value="素描">素描</option>
-              <option value="水彩">水彩</option>
-              <option value="插畫">插畫</option>
-              <option value="壓克力">壓克力</option>
+          <form id="registrationForm">
+            <h3>填寫報名資料</h3>
+            <input id="studentName" type="text" placeholder="學員姓名" required />
+            <input id="studentAge" type="number" placeholder="學員年齡" required min="1" max="100" />
+            <input id="parentName" type="text" placeholder="家長姓名（未成年需填寫）" />
+            <input id="phone" type="tel" placeholder="聯絡電話" required />
+            <select id="courseSelect" required>
+              <option value="">選擇課程</option>
+              <option value="兒童創意繪畫">兒童創意繪畫</option>
+              <option value="素描與水彩基礎">素描與水彩基礎</option>
+              <option value="作品集與個人風格">作品集與個人風格</option>
             </select>
-            <input id="artImage" type="url" placeholder="圖片網址（例如 Firebase Storage 或其他圖片連結）" required />
-            <textarea id="artDesc" placeholder="作品介紹、創作概念、課程紀錄"></textarea>
+            <textarea id="notes" placeholder="備註事項（選填）"></textarea>
             <div class="form-actions">
-              <button class="btn btn-primary" type="submit">新增到畫廊</button>
+              <button class="btn btn-primary" type="submit">送出報名</button>
               <button class="btn btn-secondary" type="reset">清空表單</button>
             </div>
-            <div class="hint">目前範例採用圖片網址欄位。若你要直接上傳圖片檔，下一步可再接 Firebase Storage。</div>
           </form>
         </article>
 
-        <article class="panel gallery-panel" id="gallery">
+        <article class="panel gallery-panel">
           <div class="section-head">
             <div>
-              <h2>作品畫廊</h2>
-              <p>這裡會讀取 Firestore 的 `gallery` 集合。你新增資料後，畫面會自動更新。</p>
+              <h2>報名紀錄</h2>
+              <p>這裡會顯示已報名的學員資料（僅供示範）。</p>
             </div>
           </div>
 
-          <div class="gallery-toolbar">
-            <div class="hint">可作為學員作品展示牆、課堂成果頁、比賽作品區。</div>
-            <button id="reloadGalleryBtn" class="btn btn-secondary" type="button">重新載入</button>
-          </div>
-
-          <div id="galleryGrid" class="gallery-grid"></div>
+          <div id="registrationList" class="gallery-grid"></div>
         </article>
+      </div>
+    </section>
+
+    <!-- LIVORO 遊戲開發介紹 -->
+    <section class="hero" id="livoro-game" style="background: linear-gradient(135deg, rgba(95,139,126,0.1), rgba(183,110,77,0.1));">
+      <div class="container">
+        <div class="hero-card" style="text-align: center;">
+          <div class="eyebrow">🎮 LIVORO 遊戲開發</div>
+          <h1>打造沉浸式遊戲體驗</h1>
+          <p style="max-width: 100%;">
+            LIVORO 是一個創新的遊戲開發專案，結合現代遊戲引擎技術與創意設計，致力於創造令人難忘的遊戲體驗。我們專注於遊戲機制設計、視覺藝術與玩家互動。
+          </p>
+        </div>
+
+        <div class="courses" style="margin-top: 40px;">
+          <article class="panel course-card">
+            <h3>🎯 遊戲設計</h3>
+            <p>創新的遊戲機制與關卡設計，提供玩家豐富的遊戲體驗與挑戰。</p>
+            <div class="chip-row">
+              <span class="chip">Unity</span>
+              <span class="chip">C#</span>
+            </div>
+          </article>
+
+          <article class="panel course-card">
+            <h3>🎨 視覺藝術</h3>
+            <p>精緻的 2D/3D 美術設計，打造獨特的遊戲風格與視覺效果。</p>
+            <div class="chip-row">
+              <span class="chip">Blender</span>
+              <span class="chip">Photoshop</span>
+            </div>
+          </article>
+
+          <article class="panel course-card">
+            <h3>🔊 音效設計</h3>
+            <p>沉浸式的音效與配樂，提升遊戲氛圍與玩家體驗。</p>
+            <div class="chip-row">
+              <span class="chip">FMOD</span>
+              <span class="chip">音樂製作</span>
+            </div>
+          </article>
+        </div>
+
+        <div class="panel feature-card" style="margin-top: 30px; padding: 40px; text-align: center;">
+          <h3>開發進度</h3>
+          <p class="muted">目前專案處於 Alpha 測試階段，預計於 2026 年第三季推出 Beta 版本。</p>
+          <div class="form-actions" style="justify-content: center; margin-top: 20px;">
+            <button class="btn btn-primary">加入測試</button>
+            <button class="btn btn-secondary">查看更多</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 英文字學網站 -->
+    <section class="hero" id="english-learning" style="background: linear-gradient(135deg, rgba(183,110,77,0.15), rgba(95,139,126,0.15));">
+      <div class="container">
+        <div class="hero-card" style="text-align: center;">
+          <div class="eyebrow">📚 英文字學平台</div>
+          <h1>輕鬆學習英文單字</h1>
+          <p style="max-width: 100%;">
+            互動式英文單字學習平台，提供單字卡、測驗、發音練習等功能，讓學習英文變得更有趣且有效率。
+          </p>
+        </div>
+
+        <div class="studio-layout" style="margin-top: 40px;">
+          <article class="panel login-panel">
+            <h3>單字學習</h3>
+            <div id="wordCard" class="login-card" style="text-align: center; padding: 40px;">
+              <h2 id="wordEnglish" style="font-size: 48px; margin-bottom: 20px; color: var(--accent);">Hello</h2>
+              <p id="wordChinese" style="font-size: 24px; color: var(--muted); margin-bottom: 30px;">你好</p>
+              <div class="form-actions" style="justify-content: center;">
+                <button id="nextWordBtn" class="btn btn-primary">下一個單字</button>
+                <button id="pronounceBtn" class="btn btn-secondary">發音</button>
+              </div>
+            </div>
+
+            <div class="feature-list" style="margin-top: 20px;">
+              <div class="feature-item">📖 超過 1000 個常用單字</div>
+              <div class="feature-item">🔊 真人發音功能</div>
+              <div class="feature-item">✅ 互動式測驗</div>
+            </div>
+          </article>
+
+          <article class="panel gallery-panel">
+            <h3>單字測驗</h3>
+            <form id="quizForm">
+              <p id="quizQuestion" style="font-size: 20px; margin-bottom: 20px;">請選擇正確的中文翻譯：<strong style="color: var(--accent);">Apple</strong></p>
+              <div style="display: grid; gap: 12px;">
+                <button type="button" class="btn btn-secondary quiz-option" data-answer="蘋果">蘋果</button>
+                <button type="button" class="btn btn-secondary quiz-option" data-answer="香蕉">香蕉</button>
+                <button type="button" class="btn btn-secondary quiz-option" data-answer="橘子">橘子</button>
+                <button type="button" class="btn btn-secondary quiz-option" data-answer="葡萄">葡萄</button>
+              </div>
+              <p id="quizResult" style="margin-top: 20px; font-weight: bold;"></p>
+            </form>
+
+            <div class="stat" style="margin-top: 30px; text-align: center;">
+              <strong id="score">0</strong>
+              <span class="muted">答對題數</span>
+            </div>
+          </article>
+        </div>
       </div>
     </section>
   </main>
 
   <footer class="footer">
     <div class="container">
-      沐光畫室網站範本｜GitHub Pages + Firebase Authentication + Firestore
+      多功能網站｜畫室報名 × LIVORO遊戲開發 × 英文字學平台｜Powered by Firebase
     </div>
   </footer>
 
@@ -698,14 +794,15 @@
       serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-    // 1. 請把這裡換成你自己的 Firebase 設定
+    // Firebase 配置
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT.appspot.com",
-      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      apiKey: "AIzaSyAme6CI2tDRgjcFhVf21w9neEKycfaCPxM",
+      authDomain: "nini-learning-system.firebaseapp.com",
+      projectId: "nini-learning-system",
+      storageBucket: "nini-learning-system.firebasestorage.app",
+      messagingSenderId: "688657476620",
+      appId: "1:688657476620:web:05848cae303b6d64a8d229",
+      measurementId: "G-XP7PPCQP18"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -720,17 +817,42 @@
     const userAvatar = document.getElementById("userAvatar");
     const userName = document.getElementById("userName");
     const userEmail = document.getElementById("userEmail");
-    const galleryForm = document.getElementById("galleryForm");
-    const galleryGrid = document.getElementById("galleryGrid");
-    const reloadGalleryBtn = document.getElementById("reloadGalleryBtn");
+    const registrationForm = document.getElementById("registrationForm");
+    const registrationList = document.getElementById("registrationList");
 
     const formFields = {
-      title: document.getElementById("artTitle"),
-      artist: document.getElementById("artArtist"),
-      category: document.getElementById("artCategory"),
-      image: document.getElementById("artImage"),
-      desc: document.getElementById("artDesc")
+      studentName: document.getElementById("studentName"),
+      studentAge: document.getElementById("studentAge"),
+      parentName: document.getElementById("parentName"),
+      phone: document.getElementById("phone"),
+      courseSelect: document.getElementById("courseSelect"),
+      notes: document.getElementById("notes")
     };
+
+    // 英文學習功能
+    const words = [
+      { english: "Hello", chinese: "你好" },
+      { english: "Apple", chinese: "蘋果" },
+      { english: "Book", chinese: "書" },
+      { english: "Cat", chinese: "貓" },
+      { english: "Dog", chinese: "狗" },
+      { english: "Water", chinese: "水" },
+      { english: "Friend", chinese: "朋友" },
+      { english: "Happy", chinese: "快樂的" },
+      { english: "School", chinese: "學校" },
+      { english: "Love", chinese: "愛" }
+    ];
+
+    let currentWordIndex = 0;
+    let score = 0;
+
+    const wordEnglish = document.getElementById("wordEnglish");
+    const wordChinese = document.getElementById("wordChinese");
+    const nextWordBtn = document.getElementById("nextWordBtn");
+    const pronounceBtn = document.getElementById("pronounceBtn");
+    const quizOptions = document.querySelectorAll(".quiz-option");
+    const quizResult = document.getElementById("quizResult");
+    const scoreDisplay = document.getElementById("score");
 
     let currentUser = null;
 
@@ -769,86 +891,110 @@
       }
     });
 
-    galleryForm.addEventListener("submit", async (event) => {
+    // 畫室報名功能
+    registrationForm.addEventListener("submit", async (event) => {
       event.preventDefault();
 
       if (!currentUser) {
-        alert("請先登入 Google 帳號後再新增作品。");
+        alert("請先登入 Google 帳號後再報名。");
         return;
       }
 
       try {
-        await addDoc(collection(db, "gallery"), {
-          title: formFields.title.value.trim(),
-          artist: formFields.artist.value.trim(),
-          category: formFields.category.value,
-          imageUrl: formFields.image.value.trim(),
-          description: formFields.desc.value.trim(),
+        await addDoc(collection(db, "registrations"), {
+          studentName: formFields.studentName.value.trim(),
+          studentAge: parseInt(formFields.studentAge.value),
+          parentName: formFields.parentName.value.trim(),
+          phone: formFields.phone.value.trim(),
+          course: formFields.courseSelect.value,
+          notes: formFields.notes.value.trim(),
           createdAt: serverTimestamp(),
           createdByUid: currentUser.uid,
           createdByName: currentUser.displayName || "未命名使用者",
           createdByEmail: currentUser.email || ""
         });
 
-        galleryForm.reset();
-        await loadGallery();
-        alert("作品已加入畫廊。");
+        registrationForm.reset();
+        await loadRegistrations();
+        alert("報名成功！");
       } catch (error) {
         console.error(error);
-        alert("新增失敗，請確認 Firestore 已啟用，且安全規則允許已登入使用者寫入 gallery。\n\n若是 GitHub Pages 網址，記得已加入 Authorized domains。");
+        alert("報名失敗，請確認 Firebase 設定正確。");
       }
     });
 
-    reloadGalleryBtn.addEventListener("click", loadGallery);
-
-    async function loadGallery() {
-      galleryGrid.innerHTML = '<div class="empty-state">畫廊資料讀取中...</div>';
+    async function loadRegistrations() {
+      registrationList.innerHTML = '<div class="empty-state">載入中...</div>';
 
       try {
-        const galleryQuery = query(collection(db, "gallery"), orderBy("createdAt", "desc"));
-        const snapshot = await getDocs(galleryQuery);
+        const regQuery = query(collection(db, "registrations"), orderBy("createdAt", "desc"));
+        const snapshot = await getDocs(regQuery);
 
         if (snapshot.empty) {
-          galleryGrid.innerHTML = '<div class="empty-state">目前還沒有作品。登入後新增第一件作品吧。</div>';
+          registrationList.innerHTML = '<div class="empty-state">目前還沒有報名紀錄。</div>';
           return;
         }
 
-        galleryGrid.innerHTML = "";
+        registrationList.innerHTML = "";
 
         snapshot.forEach((docItem) => {
           const data = docItem.data();
-          const card = document.createElement("article");
-          card.className = "gallery-item";
-
-          const safeTitle = escapeHtml(data.title || "未命名作品");
-          const safeArtist = escapeHtml(data.artist || "未標示作者");
-          const safeCategory = escapeHtml(data.category || "未分類");
-          const safeDesc = escapeHtml(data.description || "尚無介紹");
-          const safeImage = escapeAttribute(data.imageUrl || "https://placehold.co/800x600?text=Artwork");
-          const safeCreator = escapeHtml(data.createdByName || "系統");
+          const card = document.createElement("div");
+          card.className = "login-card";
+          card.style.marginBottom = "16px";
 
           card.innerHTML = `
-            <img class="gallery-image" src="${safeImage}" alt="${safeTitle}" />
-            <div class="gallery-content">
-              <div class="chip-row">
-                <span class="tag">${safeCategory}</span>
-              </div>
-              <h4>${safeTitle}</h4>
-              <p>${safeDesc}</p>
-              <div class="meta-row">
-                <span>作者：${safeArtist}</span>
-                <span>上傳者：${safeCreator}</span>
-              </div>
-            </div>
+            <h4>${escapeHtml(data.studentName || "未命名")}</h4>
+            <p class="muted">課程：${escapeHtml(data.course || "未選擇")}</p>
+            <p class="muted">年齡：${data.studentAge || "未填寫"} 歲</p>
+            <p class="muted">聯絡電話：${escapeHtml(data.phone || "未填寫")}</p>
           `;
 
-          galleryGrid.appendChild(card);
+          registrationList.appendChild(card);
         });
       } catch (error) {
         console.error(error);
-        galleryGrid.innerHTML = '<div class="empty-state">畫廊讀取失敗。請確認 Firestore 已建立、Firebase 設定正確，且有對應的安全規則。</div>';
+        registrationList.innerHTML = '<div class="empty-state">載入失敗。</div>';
       }
     }
+
+    // 英文學習功能
+    function showWord() {
+      const word = words[currentWordIndex];
+      wordEnglish.textContent = word.english;
+      wordChinese.textContent = word.chinese;
+    }
+
+    nextWordBtn.addEventListener("click", () => {
+      currentWordIndex = (currentWordIndex + 1) % words.length;
+      showWord();
+    });
+
+    pronounceBtn.addEventListener("click", () => {
+      const word = words[currentWordIndex].english;
+      const utterance = new SpeechSynthesisUtterance(word);
+      utterance.lang = "en-US";
+      speechSynthesis.speak(utterance);
+    });
+
+    quizOptions.forEach(option => {
+      option.addEventListener("click", () => {
+        const answer = option.dataset.answer;
+        if (answer === "蘋果") {
+          quizResult.textContent = "✅ 答對了！";
+          quizResult.style.color = "var(--accent-2)";
+          score++;
+          scoreDisplay.textContent = score;
+        } else {
+          quizResult.textContent = "❌ 答錯了，正確答案是：蘋果";
+          quizResult.style.color = "var(--accent)";
+        }
+      });
+    });
+
+    // 初始化
+    showWord();
+    loadRegistrations();
 
     function escapeHtml(value) {
       return String(value)
@@ -863,7 +1009,7 @@
       return escapeHtml(value);
     }
 
-    loadGallery();
+
   </script>
 </body>
 </html>
