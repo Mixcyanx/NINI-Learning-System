@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #f7f4ef;
+  --color-panel: rgba(255, 255, 255, 0.88);
+  --color-panel-strong: #ffffff;
+  --color-ink: #2f2925;
+  --color-muted: #756a63;
+  --color-accent: #c58d5d;
+  --color-accent-deep: #a66d3d;
+  --color-line: rgba(47, 41, 37, 0.08);
+  
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+  
+  --shadow-soft: 0 18px 45px rgba(56, 37, 21, 0.12);
+}
+
+@layer base {
+  body {
+    @apply bg-bg text-ink antialiased;
+    background-image: 
+      radial-gradient(circle at top left, rgba(197, 141, 93, 0.16), transparent 28%),
+      radial-gradient(circle at bottom right, rgba(165, 109, 61, 0.10), transparent 25%);
+  }
+}
