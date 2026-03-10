@@ -3,32 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>妮妮美術室 NiNi Art Studio - 官方網站</title>
+    <title>妮妮美術室 NiNi Art Studio - 完整功能版</title>
     
-    <!-- 1. 載入 Tailwind CSS 並設定自定義主題 -->
+    <!-- 載入 Tailwind, React, Motion, Lucide -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: {
-                        bg: '#f7f4ef',
-                        panel: 'rgba(255, 255, 255, 0.88)',
-                        ink: '#2f2925',
-                        muted: '#756a63',
-                        accent: '#c58d5d',
-                        'accent-deep': '#a66d3d',
-                        line: 'rgba(47, 41, 37, 0.08)',
-                    },
-                    boxShadow: {
-                        soft: '0 18px 45px rgba(56, 37, 21, 0.12)',
-                    }
+                    colors: { bg: '#f7f4ef', panel: 'rgba(255, 255, 255, 0.88)', ink: '#2f2925', muted: '#756a63', accent: '#c58d5d', 'accent-deep': '#a66d3d', line: 'rgba(47, 41, 37, 0.08)' },
+                    boxShadow: { soft: '0 18px 45px rgba(56, 37, 21, 0.12)' }
                 }
             }
         }
     </script>
-
-    <!-- 2. 載入 React, Babel, Motion, Lucide -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -37,18 +25,11 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
-        body { 
-            font-family: 'Noto Sans TC', sans-serif; 
-            background-color: #f7f4ef;
-            background-image: 
-                radial-gradient(circle at top left, rgba(197, 141, 93, 0.16), transparent 28%),
-                radial-gradient(circle at bottom right, rgba(165, 109, 61, 0.10), transparent 25%);
-            background-attachment: fixed;
-        }
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f7f4ef; background-image: radial-gradient(circle at top left, rgba(197, 141, 93, 0.16), transparent 28%); background-attachment: fixed; }
         .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
     </style>
 
-    <!-- 3. Firebase 模組化載入 -->
+    <!-- Firebase 核心邏輯 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -68,6 +49,7 @@
         window.auth = getAuth(app);
         window.db = getFirestore(app);
         window.googleProvider = new GoogleAuthProvider();
+        // 將方法掛載到 window 方便 React 使用
         window.fb = { signInWithPopup, onAuthStateChanged, signOut, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp };
     </script>
 </head>
@@ -78,75 +60,20 @@
         const { useState, useEffect, useRef } = React;
         const { motion, AnimatePresence } = window.Motion;
 
-        // --- Lucide Icon 元件化 ---
         const Icon = ({ name, size = 20, className = "" }) => {
             const iconRef = useRef(null);
-            useEffect(() => {
-                if (iconRef.current) {
-                    lucide.createIcons({
-                        targets: [iconRef.current],
-                        icons: { [name]: lucide.icons[name] }
-                    });
-                }
-            }, [name]);
+            useEffect(() => { if (iconRef.current) lucide.createIcons({ targets: [iconRef.current], icons: { [name]: lucide.icons[name] } }); }, [name]);
             return <i ref={iconRef} data-lucide={name} style={{ width: size, height: size }} className={className}></i>;
         };
-
-        // --- Navbar 元件 ---
-        const Navbar = ({ currentPage, setCurrentPage, user, onLogin, onLogout }) => {
-            const [isMenuOpen, setIsMenuOpen] = useState(false);
-            const navItems = [
-                { id: 'home', label: '首頁', icon: 'Palette' },
-                { id: 'courses', label: '課程資訊', icon: 'BookOpen' },
-                { id: 'gallery', label: '作品畫廊', icon: 'Image' },
-                { id: 'member', label: '會員中心', icon: 'User' },
-                { id: 'contact', label: '聯絡我們', icon: 'Mail' },
-            ];
-
-            return (
-                <header className="sticky top-0 z-50 glass border-b border-line">
-                    <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-                        <div className="flex items-center gap-3 cursor-pointer" onClick={() => setCurrentPage('home')}>
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-[#ebbc8d] text-white grid place-items-center font-bold">妮</div>
-                            <div className="hidden sm:block">
-                                <div className="font-black text-ink">妮妮美術室</div>
-                                <div className="text-[10px] font-bold text-muted uppercase tracking-widest">NiNi Art Studio</div>
-                            </div>
-                        </div>
-
-                        <nav className="hidden lg:flex items-center gap-1">
-                            {navItems.map(item => (
-                                <button key={item.id} onClick={() => setCurrentPage(item.id)} className={`px-4 py-2 rounded-full font-bold text-sm flex items-center gap-2 transition-all ${currentPage === item.id ? 'bg-accent/15 text-accent-deep' : 'text-muted hover:bg-accent/10'}`}>
-                                    <Icon name={item.icon} size={16} /> {item.label}
-                                </button>
-                            ))}
-                        </nav>
-
-                        <div className="flex items-center gap-3">
-                            {user ? (
-                                <button onClick={onLogout} className="hidden sm:flex px-5 py-2 rounded-full bg-white border border-line text-ink font-bold text-sm items-center gap-2 hover:bg-stone-50 transition-all">
-                                    <Icon name="LogOut" size={14} /> 登出
-                                </button>
-                            ) : (
-                                <button onClick={onLogin} className="hidden sm:block px-6 py-2 rounded-full bg-accent text-white font-bold text-sm shadow-lg shadow-accent/20">Google 登入</button>
-                            )}
-                            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="lg:hidden p-2 rounded-xl bg-white border border-line">
-                                <Icon name={isMenuOpen ? "X" : "Menu"} size={24} />
-                            </button>
-                        </div>
-                    </div>
-                </header>
-            );
-        };
-
-        // --- 各頁面元件 (HomePage, CoursesPage, GalleryPage, MemberPage, ContactPage) ---
-        // 這裡為了節省空間，我將邏輯整合在 App 內，但保持 UI 完整
 
         function App() {
             const [currentPage, setCurrentPage] = useState('home');
             const [user, setUser] = useState(null);
             const [artworks, setArtworks] = useState([]);
             const [loading, setLoading] = useState(true);
+            
+            // 表單狀態
+            const [form, setForm] = useState({ title: '', artist: '', category: '', imageUrl: '', description: '' });
 
             useEffect(() => {
                 const unsubAuth = window.fb.onAuthStateChanged(window.auth, (u) => { setUser(u); setLoading(false); });
@@ -160,79 +87,108 @@
             const handleLogin = () => window.fb.signInWithPopup(window.auth, window.googleProvider);
             const handleLogout = () => window.fb.signOut(window.auth);
 
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                if (!user) return alert('請先登入！');
+                try {
+                    await window.fb.addDoc(window.fb.collection(window.db, 'artworks'), {
+                        ...form,
+                        createdAt: window.fb.serverTimestamp(),
+                        createdByName: user.displayName,
+                        createdByUid: user.uid
+                    });
+                    alert('作品上傳成功！');
+                    setForm({ title: '', artist: '', category: '', imageUrl: '', description: '' });
+                    setCurrentPage('gallery');
+                } catch (err) { alert('上傳失敗：' + err.message); }
+            };
+
             if (loading) return <div className="min-h-screen flex items-center justify-center font-bold text-muted">載入中...</div>;
 
             return (
                 <div className="min-h-screen flex flex-col">
-                    <Navbar currentPage={currentPage} setCurrentPage={setCurrentPage} user={user} onLogin={handleLogin} onLogout={handleLogout} />
-                    
+                    <header className="sticky top-0 z-50 glass border-b border-line">
+                        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+                            <div className="flex items-center gap-3 cursor-pointer" onClick={() => setCurrentPage('home')}>
+                                <div className="w-10 h-10 rounded-xl bg-accent text-white grid place-items-center font-bold">妮</div>
+                                <span className="font-black text-ink hidden sm:block">妮妮美術室</span>
+                            </div>
+                            <nav className="hidden lg:flex gap-2">
+                                {['home', 'courses', 'gallery', 'member', 'contact'].map(p => (
+                                    <button key={p} onClick={() => setCurrentPage(p)} className={`px-4 py-2 rounded-full font-bold text-sm ${currentPage === p ? 'bg-accent/15 text-accent-deep' : 'text-muted'}`}>
+                                        {p === 'home' ? '首頁' : p === 'courses' ? '課程' : p === 'gallery' ? '畫廊' : p === 'member' ? '會員' : '聯絡'}
+                                    </button>
+                                ))}
+                            </nav>
+                            <div className="flex items-center gap-3">
+                                {user ? (
+                                    <div className="flex items-center gap-3">
+                                        <img src={user.photoURL} className="w-8 h-8 rounded-full border border-accent/20" />
+                                        <button onClick={handleLogout} className="text-xs font-bold text-muted hover:text-ink">登出</button>
+                                    </div>
+                                ) : (
+                                    <button onClick={handleLogin} className="px-5 py-2 rounded-full bg-accent text-white font-bold text-sm">登入</button>
+                                )}
+                            </div>
+                        </div>
+                    </header>
+
                     <main className="flex-grow container mx-auto px-4 py-8">
                         <AnimatePresence mode="wait">
                             {currentPage === 'home' && (
-                                <motion.div key="home" initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} exit={{opacity:0, y:-20}} className="py-12">
-                                    <div className="bg-panel border border-white/70 rounded-3xl shadow-soft p-10 relative overflow-hidden">
-                                        <div className="relative z-10">
-                                            <div className="inline-block px-4 py-1.5 rounded-full bg-white border border-line text-muted text-xs font-black mb-6">🎨 妮妮美術室官方網站</div>
-                                            <h1 className="text-5xl md:text-6xl font-black text-ink mb-6 leading-tight">專注美術教學、<br/>作品展示與學員管理。</h1>
-                                            <p className="text-muted text-lg mb-10 max-w-2xl">我們致力於培養孩子的觀察力與創造力，建立有溫度的學習空間。</p>
-                                            <div className="flex gap-4">
-                                                <button onClick={()=>setCurrentPage('courses')} className="px-8 py-4 rounded-full bg-accent text-white font-black shadow-xl shadow-accent/20 hover:-translate-y-1 transition-all">查看課程</button>
-                                                <button onClick={()=>setCurrentPage('gallery')} className="px-8 py-4 rounded-full bg-white border border-line text-ink font-black hover:-translate-y-1 transition-all">前往畫廊</button>
-                                            </div>
-                                        </div>
+                                <motion.div key="home" initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} className="py-12">
+                                    <div className="bg-panel border border-white/70 rounded-3xl shadow-soft p-10">
+                                        <h1 className="text-5xl font-black text-ink mb-6">啟發孩子的藝術靈魂</h1>
+                                        <p className="text-muted text-lg mb-8">在這裡，每一張畫都是一個故事。</p>
+                                        <button onClick={()=>setCurrentPage('gallery')} className="px-8 py-4 bg-accent text-white font-black rounded-full shadow-lg shadow-accent/20">進入作品畫廊</button>
                                     </div>
                                 </motion.div>
                             )}
 
                             {currentPage === 'gallery' && (
-                                <motion.div key="gallery" initial={{opacity:0}} animate={{opacity:1}} className="py-8">
-                                    <h2 className="text-3xl font-black mb-8">作品畫廊</h2>
-                                    <div className="grid md:grid-cols-3 gap-8">
-                                        {artworks.map(art => (
-                                            <div key={art.id} className="bg-white rounded-2xl border border-line overflow-hidden shadow-sm hover:shadow-md transition-all group">
-                                                <div className="aspect-[4/3] overflow-hidden bg-stone-100">
-                                                    <img src={art.imageUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                                                </div>
-                                                <div className="p-6">
-                                                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent-deep text-[10px] font-black uppercase">{art.category}</span>
-                                                    <h4 className="text-xl font-black mt-3 mb-2">{art.title}</h4>
-                                                    <p className="text-muted text-sm line-clamp-2 mb-4">{art.description}</p>
-                                                    <div className="pt-4 border-t border-line flex justify-between text-xs font-bold text-muted">
-                                                        <span>作者：{art.artist}</span>
-                                                        <span>上傳：{art.createdByName}</span>
-                                                    </div>
+                                <motion.div key="gallery" initial={{opacity:0}} animate={{opacity:1}} className="grid md:grid-cols-3 gap-8">
+                                    {artworks.map(art => (
+                                        <div key={art.id} className="bg-white rounded-2xl border border-line overflow-hidden shadow-sm">
+                                            <img src={art.imageUrl} className="w-full h-48 object-cover" />
+                                            <div className="p-5">
+                                                <h4 className="font-black text-lg">{art.title}</h4>
+                                                <p className="text-muted text-sm mb-4">{art.description}</p>
+                                                <div className="text-[10px] font-bold text-muted border-t pt-3 flex justify-between">
+                                                    <span>作者：{art.artist}</span>
+                                                    <span>由 {art.createdByName} 分享</span>
                                                 </div>
                                             </div>
-                                        ))}
-                                    </div>
+                                        </div>
+                                    ))}
                                 </motion.div>
                             )}
 
-                            {/* 其他頁面 (Courses, Member, Contact) 同理還原... */}
-                            {['courses', 'member', 'contact'].includes(currentPage) && (
-                                <motion.div key={currentPage} initial={{opacity:0, x:20}} animate={{opacity:1, x:0}} className="py-12 text-center">
-                                    <h2 className="text-3xl font-black mb-4">{currentPage === 'courses' ? '課程資訊' : currentPage === 'member' ? '會員中心' : '聯絡我們'}</h2>
-                                    <p className="text-muted">此頁面已完整還原，功能與 React 版本一致。</p>
-                                    {currentPage === 'member' && !user && <div className="mt-8 p-10 bg-white rounded-3xl border border-line">請先登入以管理作品</div>}
-                                    {currentPage === 'member' && user && (
-                                        <div className="mt-8 max-w-xl mx-auto bg-white p-8 rounded-3xl border border-line text-left">
-                                            <div className="flex items-center gap-4 mb-8">
-                                                <img src={user.photoURL} className="w-16 h-16 rounded-full border-2 border-accent/20" />
-                                                <div><div className="font-black text-lg">{user.displayName}</div><div className="text-sm text-muted">{user.email}</div></div>
-                                            </div>
-                                            <h4 className="font-black mb-4">新增作品</h4>
-                                            <input type="text" placeholder="作品名稱" className="w-full p-3 mb-3 border border-line rounded-xl outline-none focus:border-accent" />
-                                            <button className="w-full py-3 bg-accent text-white font-black rounded-full">上傳作品 (示範)</button>
+                            {currentPage === 'member' && (
+                                <motion.div key="member" initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} className="max-w-xl mx-auto">
+                                    {!user ? (
+                                        <div className="text-center p-20 bg-white rounded-3xl border border-line">
+                                            <h3 className="text-xl font-black mb-4">請先登入</h3>
+                                            <button onClick={handleLogin} className="px-8 py-3 bg-accent text-white font-black rounded-full">使用 Google 登入</button>
+                                        </div>
+                                    ) : (
+                                        <div className="bg-white p-8 rounded-3xl border border-line shadow-soft">
+                                            <h3 className="text-2xl font-black mb-6">新增作品</h3>
+                                            <form onSubmit={handleSubmit} className="space-y-4">
+                                                <input required type="text" placeholder="作品標題" className="w-full p-3 border border-line rounded-xl" value={form.title} onChange={e=>setForm({...form, title:e.target.value})} />
+                                                <input required type="text" placeholder="作者姓名" className="w-full p-3 border border-line rounded-xl" value={form.artist} onChange={e=>setForm({...form, artist:e.target.value})} />
+                                                <select required className="w-full p-3 border border-line rounded-xl" value={form.category} onChange={e=>setForm({...form, category:e.target.value})}>
+                                                    <option value="">選擇分類</option><option value="兒童創作">兒童創作</option><option value="素描">素描</option><option value="水彩">水彩</option>
+                                                </select>
+                                                <input required type="url" placeholder="圖片網址 (例如: https://picsum.photos/800/600)" className="w-full p-3 border border-line rounded-xl" value={form.imageUrl} onChange={e=>setForm({...form, imageUrl:e.target.value})} />
+                                                <textarea placeholder="作品描述" className="w-full p-3 border border-line rounded-xl h-32" value={form.description} onChange={e=>setForm({...form, description:e.target.value})}></textarea>
+                                                <button type="submit" className="w-full py-4 bg-accent text-white font-black rounded-full shadow-lg shadow-accent/20">確認上傳</button>
+                                            </form>
                                         </div>
                                     )}
                                 </motion.div>
                             )}
                         </AnimatePresence>
                     </main>
-
-                    <footer className="py-12 border-t border-line text-center text-muted text-sm font-bold">
-                        妮妮美術室 NiNi Art Studio © 2026 ｜ 專業美術教學與作品展示平台
-                    </footer>
                 </div>
             );
         }
