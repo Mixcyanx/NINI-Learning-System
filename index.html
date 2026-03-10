@@ -3,34 +3,38 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>多功能網站 | 畫室報名 × LIVORO遊戲 × 英文學習</title>
+  <title>妮妮美術室</title>
   <style>
     :root {
-      --bg: #f7f3ee;
-      --panel: rgba(255,255,255,0.86);
-      --ink: #2e2a27;
-      --muted: #756a62;
-      --accent: #b76e4d;
-      --accent-2: #5f8b7e;
-      --line: rgba(46,42,39,0.08);
-      --shadow: 0 18px 45px rgba(62, 40, 26, 0.12);
-      --radius: 22px;
+      --bg: #f7f4ef;
+      --panel: rgba(255,255,255,0.88);
+      --panel-strong: #ffffff;
+      --ink: #2f2925;
+      --muted: #756a63;
+      --accent: #c58d5d;
+      --accent-deep: #a66d3d;
+      --line: rgba(47,41,37,0.08);
+      --shadow: 0 18px 45px rgba(56, 37, 21, 0.12);
+      --radius: 24px;
     }
 
     * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
 
     body {
       margin: 0;
       font-family: "Noto Sans TC", "Segoe UI", sans-serif;
       color: var(--ink);
       background:
-        radial-gradient(circle at top left, rgba(183,110,77,0.18), transparent 32%),
-        radial-gradient(circle at bottom right, rgba(95,139,126,0.14), transparent 28%),
+        radial-gradient(circle at top left, rgba(197,141,93,0.16), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(165,109,61,0.10), transparent 25%),
         var(--bg);
-      line-height: 1.6;
+      line-height: 1.65;
     }
 
     a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
 
     .container {
       width: min(1180px, calc(100% - 32px));
@@ -40,9 +44,9 @@
     .topbar {
       position: sticky;
       top: 0;
-      z-index: 20;
+      z-index: 30;
       backdrop-filter: blur(16px);
-      background: rgba(247,243,238,0.74);
+      background: rgba(247,244,239,0.8);
       border-bottom: 1px solid var(--line);
     }
 
@@ -59,37 +63,49 @@
       align-items: center;
       gap: 12px;
       font-weight: 800;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.03em;
     }
 
     .brand-mark {
-      width: 42px;
-      height: 42px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, var(--accent), #d7a37d);
+      width: 46px;
+      height: 46px;
+      border-radius: 15px;
+      background: linear-gradient(135deg, var(--accent), #ebbc8d);
+      color: white;
       display: grid;
       place-items: center;
-      color: white;
       box-shadow: var(--shadow);
       font-size: 18px;
     }
 
+    .brand small { color: var(--muted); font-weight: 600; }
+
     nav {
       display: flex;
-      gap: 18px;
       align-items: center;
+      gap: 10px;
       flex-wrap: wrap;
+      justify-content: center;
     }
 
     nav a {
+      padding: 10px 14px;
+      border-radius: 999px;
       color: var(--muted);
-      font-weight: 600;
+      font-weight: 700;
+      transition: 0.2s ease;
+    }
+
+    nav a:hover,
+    nav a.active {
+      background: rgba(197,141,93,0.12);
+      color: var(--accent-deep);
     }
 
     .actions {
       display: flex;
-      gap: 10px;
       align-items: center;
+      gap: 10px;
       flex-wrap: wrap;
       justify-content: flex-end;
     }
@@ -99,9 +115,9 @@
       border-radius: 999px;
       padding: 12px 18px;
       font-size: 14px;
-      font-weight: 700;
+      font-weight: 800;
       cursor: pointer;
-      transition: 0.25s ease;
+      transition: 0.22s ease;
     }
 
     .btn:hover { transform: translateY(-1px); }
@@ -109,7 +125,7 @@
     .btn-primary {
       background: var(--accent);
       color: white;
-      box-shadow: 0 12px 24px rgba(183,110,77,0.22);
+      box-shadow: 0 12px 24px rgba(197,141,93,0.24);
     }
 
     .btn-secondary {
@@ -118,49 +134,43 @@
       border: 1px solid var(--line);
     }
 
-    .btn-danger {
-      background: #8e4a43;
-      color: white;
-    }
-
     .hero {
-      padding: 64px 0 28px;
+      padding: 54px 0 26px;
     }
 
-    .hero-grid {
+    .hero-layout {
       display: grid;
-      grid-template-columns: 1.2fr 0.9fr;
+      grid-template-columns: 1.15fr 0.85fr;
       gap: 24px;
       align-items: stretch;
     }
 
-    .hero-card,
     .panel {
       background: var(--panel);
-      border: 1px solid rgba(255,255,255,0.7);
-      box-shadow: var(--shadow);
+      border: 1px solid rgba(255,255,255,0.72);
       border-radius: var(--radius);
+      box-shadow: var(--shadow);
     }
 
     .hero-card {
-      padding: 42px;
+      padding: 40px;
+      position: relative;
+      overflow: hidden;
       min-height: 420px;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      position: relative;
-      overflow: hidden;
     }
 
     .hero-card::after {
       content: "";
       position: absolute;
-      width: 280px;
-      height: 280px;
-      right: -80px;
-      bottom: -80px;
+      right: -70px;
+      bottom: -70px;
+      width: 250px;
+      height: 250px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(183,110,77,0.2), transparent 68%);
+      background: radial-gradient(circle, rgba(197,141,93,0.22), transparent 70%);
     }
 
     .eyebrow {
@@ -168,13 +178,13 @@
       align-items: center;
       gap: 8px;
       width: fit-content;
-      background: rgba(255,255,255,0.78);
-      border: 1px solid rgba(46,42,39,0.08);
-      color: var(--muted);
-      border-radius: 999px;
       padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.8);
+      border: 1px solid var(--line);
+      color: var(--muted);
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 800;
       margin-bottom: 18px;
     }
 
@@ -183,13 +193,20 @@
     h1 {
       font-size: clamp(34px, 5vw, 58px);
       line-height: 1.08;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
     }
 
     .hero-card p {
-      max-width: 620px;
       color: var(--muted);
       font-size: 17px;
+      max-width: 620px;
+      margin-bottom: 28px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
       margin-bottom: 28px;
     }
 
@@ -197,13 +214,12 @@
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 12px;
-      margin-top: 12px;
     }
 
     .stat {
       padding: 18px;
       border-radius: 18px;
-      background: rgba(255,255,255,0.78);
+      background: rgba(255,255,255,0.82);
       border: 1px solid var(--line);
     }
 
@@ -218,26 +234,30 @@
       gap: 24px;
     }
 
-    .feature-card {
+    .side-card {
       padding: 26px;
     }
 
     .feature-list {
       display: grid;
       gap: 12px;
-      margin-top: 18px;
+      margin-top: 16px;
     }
 
     .feature-item {
       padding: 14px 16px;
       background: rgba(255,255,255,0.74);
-      border-radius: 16px;
       border: 1px solid var(--line);
-      font-weight: 600;
+      border-radius: 16px;
       color: var(--muted);
+      font-weight: 700;
     }
 
-    section {
+    main {
+      padding-bottom: 24px;
+    }
+
+    .page-shell {
       padding: 24px 0 12px;
     }
 
@@ -252,27 +272,68 @@
     .section-head p {
       color: var(--muted);
       margin-bottom: 0;
-      max-width: 680px;
+      max-width: 760px;
     }
 
-    .courses {
+    .page-switcher {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 22px;
+    }
+
+    .page-tab {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.8);
+      color: var(--muted);
+      padding: 12px 18px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: 0.22s ease;
+    }
+
+    .page-tab.active {
+      background: var(--accent);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 12px 24px rgba(197,141,93,0.22);
+    }
+
+    .site-page {
+      display: none;
+    }
+
+    .site-page.active {
+      display: block;
+      animation: fadeUp 0.28s ease;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .cards-3 {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 18px;
     }
 
-    .course-card {
+    .cards-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+    }
+
+    .card {
       padding: 24px;
     }
 
-    .course-card h3 {
-      margin-bottom: 8px;
-      font-size: 22px;
-    }
-
-    .course-card p {
+    .card p,
+    .muted {
       color: var(--muted);
-      min-height: 72px;
     }
 
     .chip-row {
@@ -283,17 +344,36 @@
     }
 
     .chip {
-      background: rgba(95,139,126,0.12);
-      color: var(--accent-2);
-      border-radius: 999px;
       padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(197,141,93,0.12);
+      color: var(--accent-deep);
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 800;
     }
 
-    .studio-layout {
+    .contact-grid {
       display: grid;
-      grid-template-columns: 0.95fr 1.05fr;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 18px;
+    }
+
+    .info-list {
+      display: grid;
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .info-item {
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.74);
+      border: 1px solid var(--line);
+    }
+
+    .member-layout {
+      display: grid;
+      grid-template-columns: 0.92fr 1.08fr;
       gap: 20px;
       align-items: start;
     }
@@ -303,11 +383,11 @@
     }
 
     .login-card {
+      margin-top: 18px;
       padding: 20px;
       border-radius: 18px;
       background: rgba(255,255,255,0.82);
       border: 1px solid var(--line);
-      margin-top: 18px;
     }
 
     .user-box {
@@ -315,8 +395,8 @@
       margin-top: 18px;
       padding: 18px;
       border-radius: 18px;
-      background: rgba(95,139,126,0.08);
-      border: 1px solid rgba(95,139,126,0.16);
+      background: rgba(197,141,93,0.08);
+      border: 1px solid rgba(197,141,93,0.16);
     }
 
     .user-meta {
@@ -334,8 +414,6 @@
       background: #ddd;
       flex-shrink: 0;
     }
-
-    .muted { color: var(--muted); }
 
     form {
       display: grid;
@@ -387,7 +465,7 @@
     .gallery-item {
       overflow: hidden;
       border-radius: 20px;
-      background: rgba(255,255,255,0.88);
+      background: rgba(255,255,255,0.9);
       border: 1px solid var(--line);
       box-shadow: 0 12px 28px rgba(62, 40, 26, 0.08);
     }
@@ -396,7 +474,6 @@
       width: 100%;
       aspect-ratio: 4 / 3;
       object-fit: cover;
-      display: block;
       background: #ece6df;
     }
 
@@ -405,8 +482,8 @@
     }
 
     .gallery-content h4 {
-      margin-bottom: 6px;
       font-size: 20px;
+      margin-bottom: 6px;
     }
 
     .gallery-content p {
@@ -430,66 +507,63 @@
       gap: 6px;
       padding: 7px 10px;
       border-radius: 999px;
-      background: rgba(183,110,77,0.1);
-      color: var(--accent);
-      font-weight: 700;
+      background: rgba(197,141,93,0.12);
+      color: var(--accent-deep);
+      font-weight: 800;
       font-size: 12px;
     }
 
     .empty-state {
       padding: 26px;
       border-radius: 20px;
-      border: 1px dashed rgba(46,42,39,0.18);
+      border: 1px dashed rgba(47,41,37,0.18);
       color: var(--muted);
       text-align: center;
       background: rgba(255,255,255,0.5);
     }
 
     .footer {
-      padding: 34px 0 50px;
+      padding: 34px 0 52px;
       color: var(--muted);
       text-align: center;
     }
 
-    @media (max-width: 980px) {
-      .hero-grid,
-      .studio-layout,
-      .courses {
+    @media (max-width: 1020px) {
+      .hero-layout,
+      .cards-3,
+      .cards-2,
+      .contact-grid,
+      .member-layout {
         grid-template-columns: 1fr;
       }
 
       .gallery-grid {
         grid-template-columns: 1fr;
       }
-
-      .hero-card {
-        padding: 30px;
-        min-height: auto;
-      }
     }
 
-    @media (max-width: 700px) {
-      .topbar-inner,
-      .section-head,
-      .gallery-toolbar {
+    @media (max-width: 760px) {
+      .topbar-inner {
+        flex-direction: column;
         align-items: stretch;
       }
 
-      .topbar-inner {
-        flex-direction: column;
-      }
-
-      nav {
-        justify-content: center;
-      }
-
+      nav,
       .actions {
-        width: 100%;
         justify-content: center;
+      }
+
+      .hero-card {
+        padding: 28px;
+        min-height: auto;
       }
 
       .hero-stats {
         grid-template-columns: 1fr;
+      }
+
+      .section-head {
+        align-items: stretch;
       }
     }
   </style>
@@ -498,281 +572,251 @@
   <header class="topbar">
     <div class="container topbar-inner">
       <div class="brand">
-        <div class="brand-mark">🎯</div>
+        <div class="brand-mark">妮</div>
         <div>
-          <div>多功能網站</div>
-          <small class="muted">Multi-Function Site</small>
+          <div>妮妮美術室</div>
+          <small>NiNi Art Studio</small>
         </div>
       </div>
 
       <nav>
-        <a href="#art-registration">畫室報名</a>
-        <a href="#livoro-game">LIVORO遊戲</a>
-        <a href="#english-learning">英文學習</a>
+        <a href="#" class="nav-link active" data-page="home">首頁</a>
+        <a href="#" class="nav-link" data-page="courses">課程資訊</a>
+        <a href="#" class="nav-link" data-page="gallery">作品畫廊</a>
+        <a href="#" class="nav-link" data-page="member">會員中心</a>
+        <a href="#" class="nav-link" data-page="contact">聯絡我們</a>
       </nav>
 
       <div class="actions">
-        <button id="googleLoginBtn" class="btn btn-primary">使用 Google 登入</button>
+        <button id="googleLoginBtn" class="btn btn-primary">Google 登入</button>
         <button id="logoutBtn" class="btn btn-secondary" style="display:none;">登出</button>
       </div>
     </div>
   </header>
 
   <main>
-    <!-- 畫室報名功能 -->
-    <section class="hero" id="art-registration">
-      <div class="container hero-grid">
-        <article class="hero-card">
-          <div class="eyebrow">🎨 畫室報名系統</div>
-          <h1>線上報名美術課程，輕鬆開啟藝術之旅</h1>
+    <section class="hero">
+      <div class="container hero-layout">
+        <article class="panel hero-card">
+          <div class="eyebrow">🎨 妮妮美術室官方網站</div>
+          <h1>專注美術教學、作品展示與學員管理的畫室網站。</h1>
           <p>
-            提供完整的畫室課程報名功能，包含課程選擇、學員資料填寫、Google 帳號登入等功能。報名資料會儲存至 Firebase Firestore，方便管理與查詢。
+            這個版本已改成純畫室功能網站，並且使用分頁式切換，不再是一頁滑到底。你可以把它放在 GitHub Pages，搭配 Firebase 做 Google 登入與畫廊管理。
           </p>
-          <div class="form-actions">
-            <a class="btn btn-primary" href="#registration-form">立即報名</a>
-            <a class="btn btn-secondary" href="#courses">查看課程</a>
+          <div class="hero-actions">
+            <button class="btn btn-primary page-jump" data-page="courses">查看課程</button>
+            <button class="btn btn-secondary page-jump" data-page="gallery">前往畫廊</button>
           </div>
           <div class="hero-stats">
             <div class="stat">
-              <strong>3</strong>
-              <span class="muted">課程類型</span>
-            </div>
-            <div class="stat">
-              <strong>線上</strong>
-              <span class="muted">即時報名</span>
+              <strong>5</strong>
+              <span class="muted">獨立頁面區塊</span>
             </div>
             <div class="stat">
               <strong>Google</strong>
-              <span class="muted">快速登入</span>
+              <span class="muted">會員登入</span>
+            </div>
+            <div class="stat">
+              <strong>Gallery</strong>
+              <span class="muted">作品持續增加</span>
             </div>
           </div>
         </article>
 
         <aside class="hero-side">
-          <div class="panel feature-card">
-            <h3>報名系統功能</h3>
+          <div class="panel side-card">
+            <h3>網站核心功能</h3>
             <div class="feature-list">
-              <div class="feature-item">Google 帳號快速登入</div>
-              <div class="feature-item">線上填寫報名表單</div>
-              <div class="feature-item">即時儲存至資料庫</div>
+              <div class="feature-item">首頁介紹與招生形象</div>
+              <div class="feature-item">課程頁獨立顯示，不跟其他內容混在一起</div>
+              <div class="feature-item">畫廊頁專門展示學員與畫室作品</div>
+              <div class="feature-item">會員中心登入後可新增作品</div>
             </div>
           </div>
-          <div class="panel feature-card">
-            <h3>適用對象</h3>
-            <p class="muted">適合各年齡層學員報名，從兒童創意繪畫到進階作品集課程，滿足不同需求。</p>
+          <div class="panel side-card">
+            <h3>適合用途</h3>
+            <p class="muted">可用於兒童繪畫班、素描班、水彩班、比賽作品展示、招生與家長查看學習成果。</p>
           </div>
         </aside>
       </div>
     </section>
 
-    <!-- 課程介紹 -->
-    <section id="courses">
+    <section class="page-shell">
       <div class="container">
-        <div class="section-head">
-          <div>
-            <h2>課程介紹</h2>
-            <p>提供多元化的美術課程，從基礎到進階，培養藝術創作能力。</p>
-          </div>
+        <div class="page-switcher">
+          <button class="page-tab active" data-page="home">首頁</button>
+          <button class="page-tab" data-page="courses">課程資訊</button>
+          <button class="page-tab" data-page="gallery">作品畫廊</button>
+          <button class="page-tab" data-page="member">會員中心</button>
+          <button class="page-tab" data-page="contact">聯絡我們</button>
         </div>
 
-        <div class="courses">
-          <article class="panel course-card">
-            <h3>兒童創意繪畫</h3>
-            <p>結合色彩、構圖、主題發想與媒材探索，建立孩子的觀察力與創造表達能力。</p>
-            <div class="chip-row">
-              <span class="chip">6–12 歲</span>
-              <span class="chip">基礎創作</span>
-            </div>
-          </article>
-
-          <article class="panel course-card">
-            <h3>素描與水彩基礎</h3>
-            <p>從明暗、比例、色彩鋪陳開始，適合初學者到進階學員系統式累積基礎。</p>
-            <div class="chip-row">
-              <span class="chip">國高中</span>
-              <span class="chip">升學基礎</span>
-            </div>
-          </article>
-
-          <article class="panel course-card"></article>
-            <h3>作品集與個人風格</h3>
-            <p>針對需要做作品集、比賽、申請學校或建立個人創作風格的學員規劃內容。</p>
-            <div class="chip-row">
-              <span class="chip">進階班</span>
-              <span class="chip">作品整理</span>
-            </div>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- 報名表單 -->
-    <section id="registration-form">
-      <div class="container studio-layout">
-        <article class="panel login-panel">
+        <section id="page-home" class="site-page active">
           <div class="section-head">
             <div>
-              <h2>課程報名</h2>
-              <p>請先使用 Google 帳號登入，然後填寫報名資料。</p>
+              <h2>畫室介紹</h2>
+              <p>妮妮美術室致力於培養孩子與學員的觀察力、創造力與表現能力，透過系統化課程與作品展示，建立有溫度的學習空間。</p>
             </div>
           </div>
 
-          <div class="login-card">
-            <h3>登入狀態</h3>
-            <p id="authStatus" class="muted">尚未登入。請先完成 Firebase 設定，再按上方「使用 Google 登入」。</p>
-
-            <div id="userBox" class="user-box">
-              <div class="user-meta">
-                <img id="userAvatar" class="avatar" alt="使用者頭像" />
-                <div>
-                  <strong id="userName">會員名稱</strong><br />
-                  <span id="userEmail" class="muted">member@example.com</span>
-                </div>
-              </div>
-            </div>
+          <div class="cards-3">
+            <article class="panel card">
+              <h3>教學理念</h3>
+              <p>重視基礎訓練、創意思考與作品完成度，讓每位學員都能在適合自己的節奏中持續進步。</p>
+            </article>
+            <article class="panel card">
+              <h3>學習環境</h3>
+              <p>提供穩定、溫暖且重視互動的畫室氛圍，讓孩子可以安心創作，家長也能看見清楚的成果累積。</p>
+            </article>
+            <article class="panel card">
+              <h3>作品紀錄</h3>
+              <p>透過線上畫廊保存學員作品，方便後續回顧、分享與建立個人作品成長歷程。</p>
+            </article>
           </div>
+        </section>
 
-          <form id="registrationForm">
-            <h3>填寫報名資料</h3>
-            <input id="studentName" type="text" placeholder="學員姓名" required />
-            <input id="studentAge" type="number" placeholder="學員年齡" required min="1" max="100" />
-            <input id="parentName" type="text" placeholder="家長姓名（未成年需填寫）" />
-            <input id="phone" type="tel" placeholder="聯絡電話" required />
-            <select id="courseSelect" required>
-              <option value="">選擇課程</option>
-              <option value="兒童創意繪畫">兒童創意繪畫</option>
-              <option value="素描與水彩基礎">素描與水彩基礎</option>
-              <option value="作品集與個人風格">作品集與個人風格</option>
-            </select>
-            <textarea id="notes" placeholder="備註事項（選填）"></textarea>
-            <div class="form-actions">
-              <button class="btn btn-primary" type="submit">送出報名</button>
-              <button class="btn btn-secondary" type="reset">清空表單</button>
-            </div>
-          </form>
-        </article>
-
-        <article class="panel gallery-panel">
+        <section id="page-courses" class="site-page">
           <div class="section-head">
             <div>
-              <h2>報名紀錄</h2>
-              <p>這裡會顯示已報名的學員資料（僅供示範）。</p>
+              <h2>課程資訊</h2>
+              <p>這一頁專門放課程，不和首頁、畫廊混在一起。之後你可以繼續加學費、時段、年齡分班。</p>
             </div>
           </div>
 
-          <div id="registrationList" class="gallery-grid"></div>
-        </article>
-      </div>
-    </section>
-
-    <!-- LIVORO 遊戲開發介紹 -->
-    <section class="hero" id="livoro-game" style="background: linear-gradient(135deg, rgba(95,139,126,0.1), rgba(183,110,77,0.1));">
-      <div class="container">
-        <div class="hero-card" style="text-align: center;">
-          <div class="eyebrow">🎮 LIVORO 遊戲開發</div>
-          <h1>打造沉浸式遊戲體驗</h1>
-          <p style="max-width: 100%;">
-            LIVORO 是一個創新的遊戲開發專案，結合現代遊戲引擎技術與創意設計，致力於創造令人難忘的遊戲體驗。我們專注於遊戲機制設計、視覺藝術與玩家互動。
-          </p>
-        </div>
-
-        <div class="courses" style="margin-top: 40px;">
-          <article class="panel course-card">
-            <h3>🎯 遊戲設計</h3>
-            <p>創新的遊戲機制與關卡設計，提供玩家豐富的遊戲體驗與挑戰。</p>
-            <div class="chip-row">
-              <span class="chip">Unity</span>
-              <span class="chip">C#</span>
-            </div>
-          </article>
-
-          <article class="panel course-card">
-            <h3>🎨 視覺藝術</h3>
-            <p>精緻的 2D/3D 美術設計，打造獨特的遊戲風格與視覺效果。</p>
-            <div class="chip-row">
-              <span class="chip">Blender</span>
-              <span class="chip">Photoshop</span>
-            </div>
-          </article>
-
-          <article class="panel course-card">
-            <h3>🔊 音效設計</h3>
-            <p>沉浸式的音效與配樂，提升遊戲氛圍與玩家體驗。</p>
-            <div class="chip-row">
-              <span class="chip">FMOD</span>
-              <span class="chip">音樂製作</span>
-            </div>
-          </article>
-        </div>
-
-        <div class="panel feature-card" style="margin-top: 30px; padding: 40px; text-align: center;">
-          <h3>開發進度</h3>
-          <p class="muted">目前專案處於 Alpha 測試階段，預計於 2026 年第三季推出 Beta 版本。</p>
-          <div class="form-actions" style="justify-content: center; margin-top: 20px;">
-            <button class="btn btn-primary">加入測試</button>
-            <button class="btn btn-secondary">查看更多</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 英文字學網站 -->
-    <section class="hero" id="english-learning" style="background: linear-gradient(135deg, rgba(183,110,77,0.15), rgba(95,139,126,0.15));">
-      <div class="container">
-        <div class="hero-card" style="text-align: center;">
-          <div class="eyebrow">📚 英文字學平台</div>
-          <h1>輕鬆學習英文單字</h1>
-          <p style="max-width: 100%;">
-            互動式英文單字學習平台，提供單字卡、測驗、發音練習等功能，讓學習英文變得更有趣且有效率。
-          </p>
-        </div>
-
-        <div class="studio-layout" style="margin-top: 40px;">
-          <article class="panel login-panel">
-            <h3>單字學習</h3>
-            <div id="wordCard" class="login-card" style="text-align: center; padding: 40px;">
-              <h2 id="wordEnglish" style="font-size: 48px; margin-bottom: 20px; color: var(--accent);">Hello</h2>
-              <p id="wordChinese" style="font-size: 24px; color: var(--muted); margin-bottom: 30px;">你好</p>
-              <div class="form-actions" style="justify-content: center;">
-                <button id="nextWordBtn" class="btn btn-primary">下一個單字</button>
-                <button id="pronounceBtn" class="btn btn-secondary">發音</button>
+          <div class="cards-3">
+            <article class="panel card">
+              <h3>兒童創意繪畫班</h3>
+              <p>以主題引導、色彩表現、媒材探索與想像力訓練為核心，適合建立美感與基礎創作能力。</p>
+              <div class="chip-row">
+                <span class="chip">適合 5–10 歲</span>
+                <span class="chip">創意表達</span>
               </div>
-            </div>
+            </article>
 
-            <div class="feature-list" style="margin-top: 20px;">
-              <div class="feature-item">📖 超過 1000 個常用單字</div>
-              <div class="feature-item">🔊 真人發音功能</div>
-              <div class="feature-item">✅ 互動式測驗</div>
+            <article class="panel card">
+              <h3>素描基礎班</h3>
+              <p>從比例、結構、明暗、質感與物體觀察開始，循序建立穩定的基礎造型能力。</p>
+              <div class="chip-row">
+                <span class="chip">國小高年級以上</span>
+                <span class="chip">基礎訓練</span>
+              </div>
+            </article>
+
+            <article class="panel card">
+              <h3>水彩與插畫班</h3>
+              <p>練習色彩搭配、構圖安排與畫面完整度，讓學員逐步形成自己的創作風格。</p>
+              <div class="chip-row">
+                <span class="chip">進階創作</span>
+                <span class="chip">色彩表現</span>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section id="page-gallery" class="site-page">
+          <div class="section-head">
+            <div>
+              <h2>作品畫廊</h2>
+              <p>這一頁只顯示畫廊內容，適合家長、學生或訪客直接查看畫室作品成果。</p>
             </div>
-          </article>
+          </div>
 
           <article class="panel gallery-panel">
-            <h3>單字測驗</h3>
-            <form id="quizForm">
-              <p id="quizQuestion" style="font-size: 20px; margin-bottom: 20px;">請選擇正確的中文翻譯：<strong style="color: var(--accent);">Apple</strong></p>
-              <div style="display: grid; gap: 12px;">
-                <button type="button" class="btn btn-secondary quiz-option" data-answer="蘋果">蘋果</button>
-                <button type="button" class="btn btn-secondary quiz-option" data-answer="香蕉">香蕉</button>
-                <button type="button" class="btn btn-secondary quiz-option" data-answer="橘子">橘子</button>
-                <button type="button" class="btn btn-secondary quiz-option" data-answer="葡萄">葡萄</button>
-              </div>
-              <p id="quizResult" style="margin-top: 20px; font-weight: bold;"></p>
-            </form>
-
-            <div class="stat" style="margin-top: 30px; text-align: center;">
-              <strong id="score">0</strong>
-              <span class="muted">答對題數</span>
+            <div class="gallery-toolbar">
+              <div class="hint">畫廊資料會從 Firestore 的 <code>gallery</code> 集合讀取。</div>
+              <button id="reloadGalleryBtn" class="btn btn-secondary" type="button">重新載入</button>
             </div>
+            <div id="galleryGrid" class="gallery-grid"></div>
           </article>
-        </div>
+        </section>
+
+        <section id="page-member" class="site-page">
+          <div class="section-head">
+            <div>
+              <h2>會員中心</h2>
+              <p>這一頁提供 Google 登入與新增作品功能。你之後也可以限制成只有老師帳號可新增。</p>
+            </div>
+          </div>
+
+          <div class="member-layout">
+            <article class="panel login-panel">
+              <h3>登入狀態</h3>
+              <div class="login-card">
+                <p id="authStatus" class="muted">尚未登入。請先完成 Firebase 設定，再按上方 Google 登入。</p>
+                <div id="userBox" class="user-box">
+                  <div class="user-meta">
+                    <img id="userAvatar" class="avatar" alt="使用者頭像" />
+                    <div>
+                      <strong id="userName">會員名稱</strong><br />
+                      <span id="userEmail" class="muted">member@example.com</span>
+                    </div>
+                  </div>
+                  <div class="hint">目前示範為登入後即可新增作品。正式上線建議搭配 Firestore 安全規則限制管理者。</div>
+                </div>
+              </div>
+            </article>
+
+            <article class="panel login-panel">
+              <form id="galleryForm">
+                <h3>新增作品到畫廊</h3>
+                <input id="artTitle" type="text" placeholder="作品名稱" required />
+                <input id="artArtist" type="text" placeholder="作者名稱 / 學員名稱" required />
+                <select id="artCategory" required>
+                  <option value="">選擇分類</option>
+                  <option value="兒童創作">兒童創作</option>
+                  <option value="素描">素描</option>
+                  <option value="水彩">水彩</option>
+                  <option value="插畫">插畫</option>
+                  <option value="壓克力">壓克力</option>
+                </select>
+                <input id="artImage" type="url" placeholder="圖片網址（Firebase Storage 或其他圖片連結）" required />
+                <textarea id="artDesc" placeholder="作品介紹、創作概念、學習紀錄"></textarea>
+                <div class="form-actions">
+                  <button class="btn btn-primary" type="submit">新增到畫廊</button>
+                  <button class="btn btn-secondary" type="reset">清空表單</button>
+                </div>
+                <div class="hint">目前使用圖片網址方式。若你要直接上傳圖片檔，下一步可再接 Firebase Storage。</div>
+              </form>
+            </article>
+          </div>
+        </section>
+
+        <section id="page-contact" class="site-page">
+          <div class="section-head">
+            <div>
+              <h2>聯絡我們</h2>
+              <p>這一頁保留給畫室基本聯絡資訊、上課地點、招生時間與家長諮詢方式。</p>
+            </div>
+          </div>
+
+          <div class="contact-grid">
+            <article class="panel card">
+              <h3>畫室資訊</h3>
+              <div class="info-list">
+                <div class="info-item"><strong>畫室名稱：</strong>妮妮美術室</div>
+                <div class="info-item"><strong>營業時間：</strong>週一至週六 10:00–20:00</div>
+                <div class="info-item"><strong>聯絡電話：</strong>請自行填入</div>
+                <div class="info-item"><strong>地址：</strong>請自行填入畫室地址</div>
+              </div>
+            </article>
+
+            <article class="panel card">
+              <h3>報名與諮詢</h3>
+              <p>可在這裡放 LINE、Facebook、Instagram、Google 表單或畫室報名連結，讓家長快速聯繫。</p>
+              <div class="chip-row">
+                <span class="chip">LINE 官方帳號</span>
+                <span class="chip">課程報名表</span>
+                <span class="chip">交通資訊</span>
+              </div>
+            </article>
+          </div>
+        </section>
       </div>
     </section>
   </main>
 
   <footer class="footer">
-    <div class="container">
-      多功能網站｜畫室報名 × LIVORO遊戲開發 × 英文字學平台｜Powered by Firebase
-    </div>
+    <div class="container">妮妮美術室｜GitHub Pages + Firebase Authentication + Firestore</div>
   </footer>
 
   <script type="module">
@@ -794,15 +838,13 @@
       serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-    // Firebase 配置
     const firebaseConfig = {
-      apiKey: "AIzaSyAme6CI2tDRgjcFhVf21w9neEKycfaCPxM",
-      authDomain: "nini-learning-system.firebaseapp.com",
-      projectId: "nini-learning-system",
-      storageBucket: "nini-learning-system.firebasestorage.app",
-      messagingSenderId: "688657476620",
-      appId: "1:688657476620:web:05848cae303b6d64a8d229",
-      measurementId: "G-XP7PPCQP18"
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -817,44 +859,48 @@
     const userAvatar = document.getElementById("userAvatar");
     const userName = document.getElementById("userName");
     const userEmail = document.getElementById("userEmail");
-    const registrationForm = document.getElementById("registrationForm");
-    const registrationList = document.getElementById("registrationList");
+    const galleryForm = document.getElementById("galleryForm");
+    const galleryGrid = document.getElementById("galleryGrid");
+    const reloadGalleryBtn = document.getElementById("reloadGalleryBtn");
 
     const formFields = {
-      studentName: document.getElementById("studentName"),
-      studentAge: document.getElementById("studentAge"),
-      parentName: document.getElementById("parentName"),
-      phone: document.getElementById("phone"),
-      courseSelect: document.getElementById("courseSelect"),
-      notes: document.getElementById("notes")
+      title: document.getElementById("artTitle"),
+      artist: document.getElementById("artArtist"),
+      category: document.getElementById("artCategory"),
+      image: document.getElementById("artImage"),
+      desc: document.getElementById("artDesc")
     };
 
-    // 英文學習功能
-    const words = [
-      { english: "Hello", chinese: "你好" },
-      { english: "Apple", chinese: "蘋果" },
-      { english: "Book", chinese: "書" },
-      { english: "Cat", chinese: "貓" },
-      { english: "Dog", chinese: "狗" },
-      { english: "Water", chinese: "水" },
-      { english: "Friend", chinese: "朋友" },
-      { english: "Happy", chinese: "快樂的" },
-      { english: "School", chinese: "學校" },
-      { english: "Love", chinese: "愛" }
-    ];
-
-    let currentWordIndex = 0;
-    let score = 0;
-
-    const wordEnglish = document.getElementById("wordEnglish");
-    const wordChinese = document.getElementById("wordChinese");
-    const nextWordBtn = document.getElementById("nextWordBtn");
-    const pronounceBtn = document.getElementById("pronounceBtn");
-    const quizOptions = document.querySelectorAll(".quiz-option");
-    const quizResult = document.getElementById("quizResult");
-    const scoreDisplay = document.getElementById("score");
+    const pageTabs = document.querySelectorAll(".page-tab, .nav-link, .page-jump");
+    const pages = document.querySelectorAll(".site-page");
+    const navLinks = document.querySelectorAll(".nav-link");
+    const switchTabs = document.querySelectorAll(".page-tab");
 
     let currentUser = null;
+
+    function setActivePage(pageName) {
+      pages.forEach((page) => {
+        page.classList.toggle("active", page.id === `page-${pageName}`);
+      });
+
+      navLinks.forEach((link) => {
+        link.classList.toggle("active", link.dataset.page === pageName);
+      });
+
+      switchTabs.forEach((tab) => {
+        tab.classList.toggle("active", tab.dataset.page === pageName);
+      });
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    pageTabs.forEach((item) => {
+      item.addEventListener("click", (event) => {
+        event.preventDefault();
+        const pageName = item.dataset.page;
+        if (pageName) setActivePage(pageName);
+      });
+    });
 
     googleLoginBtn.addEventListener("click", async () => {
       try {
@@ -885,116 +931,93 @@
         userName.textContent = user.displayName || "未命名使用者";
         userEmail.textContent = user.email || "無電子郵件";
       } else {
-        authStatus.textContent = "尚未登入。請先完成 Firebase 設定，再按上方「使用 Google 登入」。";
+        authStatus.textContent = "尚未登入。請先完成 Firebase 設定，再按上方 Google 登入。";
         userBox.style.display = "none";
         logoutBtn.style.display = "none";
       }
     });
 
-    // 畫室報名功能
-    registrationForm.addEventListener("submit", async (event) => {
+    galleryForm.addEventListener("submit", async (event) => {
       event.preventDefault();
 
       if (!currentUser) {
-        alert("請先登入 Google 帳號後再報名。");
+        alert("請先登入 Google 帳號後再新增作品。");
         return;
       }
 
       try {
-        await addDoc(collection(db, "registrations"), {
-          studentName: formFields.studentName.value.trim(),
-          studentAge: parseInt(formFields.studentAge.value),
-          parentName: formFields.parentName.value.trim(),
-          phone: formFields.phone.value.trim(),
-          course: formFields.courseSelect.value,
-          notes: formFields.notes.value.trim(),
+        await addDoc(collection(db, "gallery"), {
+          title: formFields.title.value.trim(),
+          artist: formFields.artist.value.trim(),
+          category: formFields.category.value,
+          imageUrl: formFields.image.value.trim(),
+          description: formFields.desc.value.trim(),
           createdAt: serverTimestamp(),
           createdByUid: currentUser.uid,
           createdByName: currentUser.displayName || "未命名使用者",
           createdByEmail: currentUser.email || ""
         });
 
-        registrationForm.reset();
-        await loadRegistrations();
-        alert("報名成功！");
+        galleryForm.reset();
+        await loadGallery();
+        alert("作品已加入畫廊。");
+        setActivePage("gallery");
       } catch (error) {
         console.error(error);
-        alert("報名失敗，請確認 Firebase 設定正確。");
+        alert("新增失敗，請確認 Firestore 已啟用，且安全規則允許已登入使用者寫入 gallery。\n\n若是 GitHub Pages 網址，記得已加入 Authorized domains。");
       }
     });
 
-    async function loadRegistrations() {
-      registrationList.innerHTML = '<div class="empty-state">載入中...</div>';
+    reloadGalleryBtn.addEventListener("click", loadGallery);
+
+    async function loadGallery() {
+      galleryGrid.innerHTML = '<div class="empty-state">畫廊資料讀取中...</div>';
 
       try {
-        const regQuery = query(collection(db, "registrations"), orderBy("createdAt", "desc"));
-        const snapshot = await getDocs(regQuery);
+        const galleryQuery = query(collection(db, "gallery"), orderBy("createdAt", "desc"));
+        const snapshot = await getDocs(galleryQuery);
 
         if (snapshot.empty) {
-          registrationList.innerHTML = '<div class="empty-state">目前還沒有報名紀錄。</div>';
+          galleryGrid.innerHTML = '<div class="empty-state">目前還沒有作品。登入後新增第一件作品吧。</div>';
           return;
         }
 
-        registrationList.innerHTML = "";
+        galleryGrid.innerHTML = "";
 
         snapshot.forEach((docItem) => {
           const data = docItem.data();
-          const card = document.createElement("div");
-          card.className = "login-card";
-          card.style.marginBottom = "16px";
+          const card = document.createElement("article");
+          card.className = "gallery-item";
+
+          const safeTitle = escapeHtml(data.title || "未命名作品");
+          const safeArtist = escapeHtml(data.artist || "未標示作者");
+          const safeCategory = escapeHtml(data.category || "未分類");
+          const safeDesc = escapeHtml(data.description || "尚無介紹");
+          const safeImage = escapeAttribute(data.imageUrl || "https://placehold.co/800x600?text=Artwork");
+          const safeCreator = escapeHtml(data.createdByName || "系統");
 
           card.innerHTML = `
-            <h4>${escapeHtml(data.studentName || "未命名")}</h4>
-            <p class="muted">課程：${escapeHtml(data.course || "未選擇")}</p>
-            <p class="muted">年齡：${data.studentAge || "未填寫"} 歲</p>
-            <p class="muted">聯絡電話：${escapeHtml(data.phone || "未填寫")}</p>
+            <img class="gallery-image" src="${safeImage}" alt="${safeTitle}" />
+            <div class="gallery-content">
+              <div class="chip-row">
+                <span class="tag">${safeCategory}</span>
+              </div>
+              <h4>${safeTitle}</h4>
+              <p>${safeDesc}</p>
+              <div class="meta-row">
+                <span>作者：${safeArtist}</span>
+                <span>上傳者：${safeCreator}</span>
+              </div>
+            </div>
           `;
 
-          registrationList.appendChild(card);
+          galleryGrid.appendChild(card);
         });
       } catch (error) {
         console.error(error);
-        registrationList.innerHTML = '<div class="empty-state">載入失敗。</div>';
+        galleryGrid.innerHTML = '<div class="empty-state">畫廊讀取失敗。請確認 Firestore 已建立、Firebase 設定正確，且有對應的安全規則。</div>';
       }
     }
-
-    // 英文學習功能
-    function showWord() {
-      const word = words[currentWordIndex];
-      wordEnglish.textContent = word.english;
-      wordChinese.textContent = word.chinese;
-    }
-
-    nextWordBtn.addEventListener("click", () => {
-      currentWordIndex = (currentWordIndex + 1) % words.length;
-      showWord();
-    });
-
-    pronounceBtn.addEventListener("click", () => {
-      const word = words[currentWordIndex].english;
-      const utterance = new SpeechSynthesisUtterance(word);
-      utterance.lang = "en-US";
-      speechSynthesis.speak(utterance);
-    });
-
-    quizOptions.forEach(option => {
-      option.addEventListener("click", () => {
-        const answer = option.dataset.answer;
-        if (answer === "蘋果") {
-          quizResult.textContent = "✅ 答對了！";
-          quizResult.style.color = "var(--accent-2)";
-          score++;
-          scoreDisplay.textContent = score;
-        } else {
-          quizResult.textContent = "❌ 答錯了，正確答案是：蘋果";
-          quizResult.style.color = "var(--accent)";
-        }
-      });
-    });
-
-    // 初始化
-    showWord();
-    loadRegistrations();
 
     function escapeHtml(value) {
       return String(value)
@@ -1009,7 +1032,8 @@
       return escapeHtml(value);
     }
 
-
+    loadGallery();
+    setActivePage("home");
   </script>
 </body>
 </html>
