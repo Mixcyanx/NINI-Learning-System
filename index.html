@@ -1,22 +1,35 @@
+--- START OF FILE index.html ---
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>妮妮美術室 NiNi Art Studio - 完整功能版</title>
+    <title>妮妮美術室 NiNi Art Studio - 官方網站</title>
     
-    <!-- 載入 Tailwind, React, Motion, Lucide -->
+    <!-- 載入核心庫 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: { bg: '#f7f4ef', panel: 'rgba(255, 255, 255, 0.88)', ink: '#2f2925', muted: '#756a63', accent: '#c58d5d', 'accent-deep': '#a66d3d', line: 'rgba(47, 41, 37, 0.08)' },
-                    boxShadow: { soft: '0 18px 45px rgba(56, 37, 21, 0.12)' }
+                    colors: {
+                        bg: '#f8f6f2',
+                        panel: 'rgba(255, 255, 255, 0.85)',
+                        ink: '#2d2723',
+                        muted: '#786d66',
+                        accent: '#d4a373',
+                        'accent-deep': '#b5835a',
+                        line: 'rgba(45, 39, 35, 0.08)',
+                    },
+                    boxShadow: {
+                        'art': '0 20px 40px rgba(0,0,0,0.06)',
+                        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
+                    }
                 }
             }
         }
     </script>
+
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -24,16 +37,25 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
-        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f7f4ef; background-image: radial-gradient(circle at top left, rgba(197, 141, 93, 0.16), transparent 28%); background-attachment: fixed; }
-        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
+        body { 
+            font-family: 'Noto Sans TC', sans-serif; 
+            background-color: #f8f6f2;
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(212, 163, 115, 0.15) 0%, transparent 35%),
+                radial-gradient(circle at 100% 100%, rgba(181, 131, 90, 0.1) 0%, transparent 35%);
+            background-attachment: fixed;
+        }
+        .serif { font-family: 'Noto Serif TC', serif; }
+        .glass { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 
-    <!-- Firebase 核心邏輯 -->
+    <!-- Firebase 整合 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, deleteDoc, doc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAme6CI2tDRgjcFhVf21w9neEKycfaCPxM",
@@ -41,160 +63,472 @@
             projectId: "nini-learning-system",
             storageBucket: "nini-learning-system.firebasestorage.app",
             messagingSenderId: "688657476620",
-            appId: "1:688657476620:web:48a91c03d198731aa8d229",
-            measurementId: "G-8N9B1EGT5B"
+            appId: "1:688657476620:web:48a91c03d198731aa8d229"
         };
 
         const app = initializeApp(firebaseConfig);
         window.auth = getAuth(app);
         window.db = getFirestore(app);
         window.googleProvider = new GoogleAuthProvider();
-        // 將方法掛載到 window 方便 React 使用
-        window.fb = { signInWithPopup, onAuthStateChanged, signOut, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp };
+        window.fb = { signInWithPopup, onAuthStateChanged, signOut, collection, addDoc, deleteDoc, doc, query, orderBy, onSnapshot, serverTimestamp };
     </script>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+        const { useState, useEffect, useRef, useMemo } = React;
         const { motion, AnimatePresence } = window.Motion;
 
+        // --- 通用元件：圖示 ---
         const Icon = ({ name, size = 20, className = "" }) => {
             const iconRef = useRef(null);
-            useEffect(() => { if (iconRef.current) lucide.createIcons({ targets: [iconRef.current], icons: { [name]: lucide.icons[name] } }); }, [name]);
+            useEffect(() => {
+                if (iconRef.current) {
+                    lucide.createIcons({ targets: [iconRef.current], icons: { [name]: lucide.icons[name] } });
+                }
+            }, [name]);
             return <i ref={iconRef} data-lucide={name} style={{ width: size, height: size }} className={className}></i>;
         };
 
+        // --- 主要應用程式 ---
         function App() {
             const [currentPage, setCurrentPage] = useState('home');
             const [user, setUser] = useState(null);
+            const [isAdmin, setIsAdmin] = useState(false);
             const [artworks, setArtworks] = useState([]);
+            const [courses, setCourses] = useState([]);
             const [loading, setLoading] = useState(true);
-            
-            // 表單狀態
-            const [form, setForm] = useState({ title: '', artist: '', category: '', imageUrl: '', description: '' });
 
+            // 初始化與監聽資料
             useEffect(() => {
-                const unsubAuth = window.fb.onAuthStateChanged(window.auth, (u) => { setUser(u); setLoading(false); });
-                const q = window.fb.query(window.fb.collection(window.db, 'artworks'), window.fb.orderBy('createdAt', 'desc'));
-                const unsubGallery = window.fb.onSnapshot(q, (snap) => {
+                const unsubAuth = window.fb.onAuthStateChanged(window.auth, (u) => {
+                    setUser(u);
+                    // 檢查 Session 中的 Admin 狀態
+                    if (sessionStorage.getItem('isNiNiAdmin') === 'true') setIsAdmin(true);
+                    setLoading(false);
+                });
+
+                // 監聽作品
+                const qArt = window.fb.query(window.fb.collection(window.db, 'artworks'), window.fb.orderBy('createdAt', 'desc'));
+                const unsubArt = window.fb.onSnapshot(qArt, (snap) => {
                     setArtworks(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
                 });
-                return () => { unsubAuth(); unsubGallery(); };
+
+                // 監聽課程
+                const qCourse = window.fb.query(window.fb.collection(window.db, 'courses'), window.fb.orderBy('createdAt', 'asc'));
+                const unsubCourse = window.fb.onSnapshot(qCourse, (snap) => {
+                    setCourses(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+                });
+
+                return () => { unsubAuth(); unsubArt(); unsubCourse(); };
             }, []);
 
-            const handleLogin = () => window.fb.signInWithPopup(window.auth, window.googleProvider);
-            const handleLogout = () => window.fb.signOut(window.auth);
-
-            const handleSubmit = async (e) => {
-                e.preventDefault();
-                if (!user) return alert('請先登入！');
-                try {
-                    await window.fb.addDoc(window.fb.collection(window.db, 'artworks'), {
-                        ...form,
-                        createdAt: window.fb.serverTimestamp(),
-                        createdByName: user.displayName,
-                        createdByUid: user.uid
-                    });
-                    alert('作品上傳成功！');
-                    setForm({ title: '', artist: '', category: '', imageUrl: '', description: '' });
-                    setCurrentPage('gallery');
-                } catch (err) { alert('上傳失敗：' + err.message); }
+            const handleLogin = async () => {
+                try { await window.fb.signInWithPopup(window.auth, window.googleProvider); } 
+                catch (e) { alert("登入失敗"); }
             };
 
-            if (loading) return <div className="min-h-screen flex items-center justify-center font-bold text-muted">載入中...</div>;
+            const handleLogout = () => {
+                window.fb.signOut(window.auth);
+                setIsAdmin(false);
+                sessionStorage.removeItem('isNiNiAdmin');
+            };
+
+            const verifyAdmin = (pwd) => {
+                if (pwd === "720205") {
+                    setIsAdmin(true);
+                    sessionStorage.setItem('isNiNiAdmin', 'true');
+                    alert("管理者模式已啟動");
+                } else {
+                    alert("密碼錯誤");
+                }
+            };
+
+            if (loading) return (
+                <div className="min-h-screen flex flex-col items-center justify-center bg-bg">
+                    <div className="w-12 h-12 border-4 border-accent border-t-transparent rounded-full animate-spin mb-4"></div>
+                    <div className="text-muted font-bold tracking-widest animate-pulse">NINI ART STUDIO</div>
+                </div>
+            );
 
             return (
                 <div className="min-h-screen flex flex-col">
-                    <header className="sticky top-0 z-50 glass border-b border-line">
-                        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-                            <div className="flex items-center gap-3 cursor-pointer" onClick={() => setCurrentPage('home')}>
-                                <div className="w-10 h-10 rounded-xl bg-accent text-white grid place-items-center font-bold">妮</div>
-                                <span className="font-black text-ink hidden sm:block">妮妮美術室</span>
+                    {/* Navbar */}
+                    <nav className="fixed top-0 w-full z-50 glass border-b border-line px-6 py-4">
+                        <div className="max-w-7xl mx-auto flex items-center justify-between">
+                            <div className="flex items-center gap-4 cursor-pointer" onClick={() => setCurrentPage('home')}>
+                                <div className="w-11 h-11 bg-accent rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-accent/30">妮</div>
+                                <div className="hidden md:block">
+                                    <h1 className="serif text-xl font-black text-ink tracking-tight">妮妮美術室</h1>
+                                    <p className="text-[10px] font-bold text-muted uppercase tracking-[0.2em]">NiNi Art Studio</p>
+                                </div>
                             </div>
-                            <nav className="hidden lg:flex gap-2">
-                                {['home', 'courses', 'gallery', 'member', 'contact'].map(p => (
-                                    <button key={p} onClick={() => setCurrentPage(p)} className={`px-4 py-2 rounded-full font-bold text-sm ${currentPage === p ? 'bg-accent/15 text-accent-deep' : 'text-muted'}`}>
-                                        {p === 'home' ? '首頁' : p === 'courses' ? '課程' : p === 'gallery' ? '畫廊' : p === 'member' ? '會員' : '聯絡'}
+                            
+                            <div className="hidden lg:flex items-center gap-2">
+                                {[
+                                    { id: 'home', label: '首頁', icon: 'Home' },
+                                    { id: 'courses', label: '課程資訊', icon: 'Book' },
+                                    { id: 'gallery', label: '學生畫廊', icon: 'Palette' },
+                                    { id: 'contact', label: '聯絡我們', icon: 'Phone' },
+                                    { id: 'member', label: '會員中心', icon: 'User' },
+                                ].map(item => (
+                                    <button 
+                                        key={item.id}
+                                        onClick={() => setCurrentPage(item.id)}
+                                        className={`px-5 py-2 rounded-full text-sm font-bold transition-all flex items-center gap-2 ${currentPage === item.id ? 'bg-accent text-white shadow-md shadow-accent/20' : 'text-muted hover:bg-stone-100'}`}
+                                    >
+                                        <Icon name={item.icon} size={16} /> {item.label}
                                     </button>
                                 ))}
-                            </nav>
+                                {isAdmin && (
+                                    <div className="ml-4 px-3 py-1 rounded-md bg-rose-50 text-rose-500 text-[10px] font-black border border-rose-100">管理者模式</div>
+                                )}
+                            </div>
+
                             <div className="flex items-center gap-3">
                                 {user ? (
                                     <div className="flex items-center gap-3">
-                                        <img src={user.photoURL} className="w-8 h-8 rounded-full border border-accent/20" />
-                                        <button onClick={handleLogout} className="text-xs font-bold text-muted hover:text-ink">登出</button>
+                                        <img src={user.photoURL} className="w-9 h-9 rounded-full border border-line" alt="user" />
+                                        <button onClick={handleLogout} className="p-2 hover:bg-rose-50 text-muted hover:text-rose-500 rounded-full transition-colors"><Icon name="LogOut" size={20}/></button>
                                     </div>
                                 ) : (
-                                    <button onClick={handleLogin} className="px-5 py-2 rounded-full bg-accent text-white font-bold text-sm">登入</button>
+                                    <button onClick={handleLogin} className="px-6 py-2.5 rounded-full bg-ink text-white text-sm font-bold hover:opacity-90 transition-all">登入</button>
                                 )}
                             </div>
                         </div>
-                    </header>
+                    </nav>
 
-                    <main className="flex-grow container mx-auto px-4 py-8">
-                        <AnimatePresence mode="wait">
-                            {currentPage === 'home' && (
-                                <motion.div key="home" initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} className="py-12">
-                                    <div className="bg-panel border border-white/70 rounded-3xl shadow-soft p-10">
-                                        <h1 className="text-5xl font-black text-ink mb-6">啟發孩子的藝術靈魂</h1>
-                                        <p className="text-muted text-lg mb-8">在這裡，每一張畫都是一個故事。</p>
-                                        <button onClick={()=>setCurrentPage('gallery')} className="px-8 py-4 bg-accent text-white font-black rounded-full shadow-lg shadow-accent/20">進入作品畫廊</button>
-                                    </div>
-                                </motion.div>
-                            )}
-
-                            {currentPage === 'gallery' && (
-                                <motion.div key="gallery" initial={{opacity:0}} animate={{opacity:1}} className="grid md:grid-cols-3 gap-8">
-                                    {artworks.map(art => (
-                                        <div key={art.id} className="bg-white rounded-2xl border border-line overflow-hidden shadow-sm">
-                                            <img src={art.imageUrl} className="w-full h-48 object-cover" />
-                                            <div className="p-5">
-                                                <h4 className="font-black text-lg">{art.title}</h4>
-                                                <p className="text-muted text-sm mb-4">{art.description}</p>
-                                                <div className="text-[10px] font-bold text-muted border-t pt-3 flex justify-between">
-                                                    <span>作者：{art.artist}</span>
-                                                    <span>由 {art.createdByName} 分享</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </motion.div>
-                            )}
-
-                            {currentPage === 'member' && (
-                                <motion.div key="member" initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} className="max-w-xl mx-auto">
-                                    {!user ? (
-                                        <div className="text-center p-20 bg-white rounded-3xl border border-line">
-                                            <h3 className="text-xl font-black mb-4">請先登入</h3>
-                                            <button onClick={handleLogin} className="px-8 py-3 bg-accent text-white font-black rounded-full">使用 Google 登入</button>
-                                        </div>
-                                    ) : (
-                                        <div className="bg-white p-8 rounded-3xl border border-line shadow-soft">
-                                            <h3 className="text-2xl font-black mb-6">新增作品</h3>
-                                            <form onSubmit={handleSubmit} className="space-y-4">
-                                                <input required type="text" placeholder="作品標題" className="w-full p-3 border border-line rounded-xl" value={form.title} onChange={e=>setForm({...form, title:e.target.value})} />
-                                                <input required type="text" placeholder="作者姓名" className="w-full p-3 border border-line rounded-xl" value={form.artist} onChange={e=>setForm({...form, artist:e.target.value})} />
-                                                <select required className="w-full p-3 border border-line rounded-xl" value={form.category} onChange={e=>setForm({...form, category:e.target.value})}>
-                                                    <option value="">選擇分類</option><option value="兒童創作">兒童創作</option><option value="素描">素描</option><option value="水彩">水彩</option>
-                                                </select>
-                                                <input required type="url" placeholder="圖片網址 (例如: https://picsum.photos/800/600)" className="w-full p-3 border border-line rounded-xl" value={form.imageUrl} onChange={e=>setForm({...form, imageUrl:e.target.value})} />
-                                                <textarea placeholder="作品描述" className="w-full p-3 border border-line rounded-xl h-32" value={form.description} onChange={e=>setForm({...form, description:e.target.value})}></textarea>
-                                                <button type="submit" className="w-full py-4 bg-accent text-white font-black rounded-full shadow-lg shadow-accent/20">確認上傳</button>
-                                            </form>
-                                        </div>
-                                    )}
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                    {/* Main Content */}
+                    <main className="flex-grow pt-28 pb-20 px-6">
+                        <div className="max-w-7xl mx-auto">
+                            <AnimatePresence mode="wait">
+                                {currentPage === 'home' && <HomeView key="home" onStart={() => setCurrentPage('courses')} />}
+                                {currentPage === 'courses' && <CoursesView key="courses" courses={courses} isAdmin={isAdmin} />}
+                                {currentPage === 'gallery' && <GalleryView key="gallery" artworks={artworks} isAdmin={isAdmin} />}
+                                {currentPage === 'contact' && <ContactView key="contact" />}
+                                {currentPage === 'member' && <MemberView key="member" user={user} isAdmin={isAdmin} onVerify={verifyAdmin} artworks={artworks} onLogin={handleLogin} />}
+                            </AnimatePresence>
+                        </div>
                     </main>
+
+                    {/* Footer */}
+                    <footer className="py-12 border-t border-line bg-white/50">
+                        <div className="max-w-7xl mx-auto px-6 text-center">
+                            <div className="serif text-2xl font-black text-ink mb-4 italic">NiNi Art.</div>
+                            <p className="text-muted text-sm font-medium tracking-widest">讓藝術融入生活，用畫筆記錄純粹</p>
+                            <div className="mt-8 pt-8 border-t border-line/50 flex flex-col md:flex-row justify-between items-center gap-4">
+                                <p className="text-muted text-[11px] font-bold opacity-60">© 2026 NINI ART STUDIO. ALL RIGHTS RESERVED.</p>
+                                <div className="flex gap-6">
+                                    <a href="#" className="text-muted hover:text-accent transition-colors"><Icon name="Instagram" size={18}/></a>
+                                    <a href="#" className="text-muted hover:text-accent transition-colors"><Icon name="Facebook" size={18}/></a>
+                                </div>
+                            </div>
+                        </div>
+                    </footer>
                 </div>
             );
         }
+
+        // --- 子頁面：首頁 ---
+        const HomeView = ({ onStart }) => (
+            <motion.div initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} exit={{opacity:0, y:-20}} className="relative">
+                <div className="grid lg:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <motion.div initial={{opacity:0, x:-20}} animate={{opacity:1, x:0}} transition={{delay:0.2}} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent-deep text-xs font-black mb-8 border border-accent/10">
+                            <span className="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
+                            NEW SEMESTER 2026 現正招生中
+                        </motion.div>
+                        <h2 className="serif text-5xl md:text-7xl text-ink leading-[1.15] mb-8">
+                            釋放孩子的<br/><span className="text-accent underline decoration-stone-200 underline-offset-8">色彩天賦</span>
+                        </h2>
+                        <p className="text-muted text-lg md:text-xl leading-relaxed mb-10 max-w-lg">
+                            我們不只教畫畫，更在乎觀察與感受。提供專業的油畫、水彩、多媒材課程，為不同年齡層的孩子打造溫馨的創作空間。
+                        </p>
+                        <div className="flex flex-wrap gap-4">
+                            <button onClick={onStart} className="px-10 py-5 rounded-2xl bg-accent text-white font-black shadow-2xl shadow-accent/40 hover:-translate-y-1 transition-all">開始探索課程</button>
+                            <button className="px-10 py-5 rounded-2xl bg-white border border-line text-ink font-black hover:bg-stone-50 transition-all flex items-center gap-2">
+                                <Icon name="PlayCircle" /> 預覽教室環境
+                            </button>
+                        </div>
+                    </div>
+                    <div className="relative">
+                        <div className="aspect-[4/5] rounded-[3rem] overflow-hidden shadow-art rotate-2">
+                            <img src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=800&q=80" className="w-full h-full object-cover" alt="Art" />
+                        </div>
+                        <div className="absolute -bottom-6 -left-6 bg-white p-6 rounded-3xl shadow-xl border border-line flex items-center gap-4">
+                            <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center font-black">5.0</div>
+                            <div>
+                                <div className="font-black text-ink">專業師資認證</div>
+                                <div className="text-xs text-muted">超過 200+ 學員好評推薦</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </motion.div>
+        );
+
+        // --- 子頁面：課程資訊 ---
+        const CoursesView = ({ courses, isAdmin }) => {
+            const [isAdding, setIsAdding] = useState(false);
+            const [newCourse, setNewCourse] = useState({ title: '', age: '', price: '', desc: '', icon: 'Palette' });
+
+            const addCourse = async () => {
+                if (!newCourse.title || !newCourse.price) return alert("請填寫完整");
+                await window.fb.addDoc(window.fb.collection(window.db, 'courses'), { ...newCourse, createdAt: window.fb.serverTimestamp() });
+                setIsAdding(false);
+                setNewCourse({ title: '', age: '', price: '', desc: '', icon: 'Palette' });
+            };
+
+            const deleteCourse = async (id) => {
+                if(confirm("確定刪除此課程？")) await window.fb.deleteDoc(window.fb.doc(window.db, 'courses', id));
+            };
+
+            return (
+                <motion.div initial={{opacity:0}} animate={{opacity:1}} className="space-y-12">
+                    <div className="flex justify-between items-end">
+                        <div>
+                            <h2 className="serif text-4xl font-black text-ink mb-4">藝術探索課程</h2>
+                            <p className="text-muted">根據年齡與程度設計，漸進式啟發美感與技巧。</p>
+                        </div>
+                        {isAdmin && (
+                            <button onClick={() => setIsAdding(true)} className="flex items-center gap-2 px-6 py-3 bg-ink text-white rounded-xl font-bold text-sm">
+                                <Icon name="Plus" size={18}/> 新增課程
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {courses.map(course => (
+                            <div key={course.id} className="group p-8 rounded-[2.5rem] bg-white border border-line shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:scale-110 transition-transform">
+                                    <Icon name={course.icon || "Palette"} size={120} />
+                                </div>
+                                <div className="relative z-10">
+                                    <div className="w-14 h-14 rounded-2xl bg-accent/10 text-accent flex items-center justify-center mb-6">
+                                        <Icon name={course.icon || "Palette"} size={28} />
+                                    </div>
+                                    <h4 className="text-2xl font-black text-ink mb-2">{course.title}</h4>
+                                    <span className="inline-block px-3 py-1 rounded-full bg-stone-100 text-muted text-[11px] font-bold mb-4">{course.age}</span>
+                                    <p className="text-muted text-sm leading-relaxed mb-8">{course.desc}</p>
+                                    <div className="flex items-center justify-between pt-6 border-t border-line">
+                                        <div className="font-black text-accent text-xl">{course.price}</div>
+                                        {isAdmin ? (
+                                            <button onClick={() => deleteCourse(course.id)} className="p-2 text-rose-300 hover:text-rose-500"><Icon name="Trash2" size={18}/></button>
+                                        ) : (
+                                            <button className="text-ink font-bold text-sm flex items-center gap-2 group-hover:gap-4 transition-all">立即報名 <Icon name="ArrowRight" size={14}/></button>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {isAdding && (
+                        <div className="fixed inset-0 z-[60] bg-ink/40 backdrop-blur-sm flex items-center justify-center p-6">
+                            <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl">
+                                <h3 className="text-xl font-black mb-6">新增課程內容</h3>
+                                <div className="space-y-4">
+                                    <input className="w-full p-3 border border-line rounded-xl outline-none focus:border-accent" placeholder="課程名稱" value={newCourse.title} onChange={e=>setNewCourse({...newCourse, title: e.target.value})} />
+                                    <input className="w-full p-3 border border-line rounded-xl outline-none focus:border-accent" placeholder="年齡層 (例: 5-8歲)" value={newCourse.age} onChange={e=>setNewCourse({...newCourse, age: e.target.value})} />
+                                    <input className="w-full p-3 border border-line rounded-xl outline-none focus:border-accent" placeholder="價格 (例: $4,500 / 8堂)" value={newCourse.price} onChange={e=>setNewCourse({...newCourse, price: e.target.value})} />
+                                    <textarea className="w-full p-3 border border-line rounded-xl outline-none focus:border-accent h-32" placeholder="課程簡介" value={newCourse.desc} onChange={e=>setNewCourse({...newCourse, desc: e.target.value})} />
+                                    <div className="flex gap-3 pt-2">
+                                        <button onClick={addCourse} className="flex-1 py-3 bg-accent text-white font-black rounded-xl">儲存發佈</button>
+                                        <button onClick={()=>setIsAdding(false)} className="px-6 py-3 bg-stone-100 text-muted font-bold rounded-xl">取消</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </motion.div>
+            );
+        };
+
+        // --- 子頁面：學生畫廊 ---
+        const GalleryView = ({ artworks, isAdmin }) => {
+            const [filter, setFilter] = useState('全部');
+            const categories = ['全部', '油畫', '水彩', '素描', '多媒材'];
+            
+            const filteredArt = filter === '全部' ? artworks : artworks.filter(a => a.category === filter);
+
+            const deleteArt = async (id) => {
+                if(confirm("確定刪除此作品？")) await window.fb.deleteDoc(window.fb.doc(window.db, 'artworks', id));
+            };
+
+            return (
+                <motion.div initial={{opacity:0}} animate={{opacity:1}}>
+                    <div className="text-center mb-16">
+                        <h2 className="serif text-4xl font-black text-ink mb-6">小小藝術家畫廊</h2>
+                        <div className="flex justify-center gap-2 overflow-x-auto no-scrollbar pb-2">
+                            {categories.map(c => (
+                                <button key={c} onClick={()=>setFilter(c)} className={`px-6 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${filter === c ? 'bg-ink text-white' : 'bg-white border border-line text-muted hover:bg-stone-50'}`}>{c}</button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+                        {filteredArt.map(art => (
+                            <motion.div layout key={art.id} className="group">
+                                <div className="aspect-[4/5] rounded-[2rem] overflow-hidden bg-stone-100 mb-6 shadow-sm group-hover:shadow-xl transition-all relative">
+                                    <img src={art.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={art.title} />
+                                    {isAdmin && (
+                                        <button onClick={() => deleteArt(art.id)} className="absolute top-4 right-4 p-3 bg-white/90 backdrop-blur rounded-full text-rose-500 shadow-xl opacity-0 group-hover:opacity-100 transition-opacity"><Icon name="Trash2" size={18}/></button>
+                                    )}
+                                </div>
+                                <div className="px-2">
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-accent mb-2 block">{art.category}</span>
+                                    <h4 className="text-xl font-black text-ink mb-1">{art.title}</h4>
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-muted text-sm italic">Artist: {art.artist}</p>
+                                        <p className="text-[10px] text-stone-300 font-bold">{new Date(art.createdAt?.seconds * 1000).toLocaleDateString()}</p>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                </motion.div>
+            );
+        };
+
+        // --- 子頁面：聯絡我們 ---
+        const ContactView = () => (
+            <motion.div initial={{opacity:0, scale:0.95}} animate={{opacity:1, scale:1}} className="max-w-4xl mx-auto bg-white rounded-[3rem] shadow-soft border border-line overflow-hidden flex flex-col md:flex-row">
+                <div className="bg-ink p-12 text-white md:w-2/5">
+                    <h2 className="serif text-3xl mb-8">預約參觀</h2>
+                    <div className="space-y-8">
+                        <div className="flex gap-4">
+                            <Icon name="MapPin" className="text-accent" />
+                            <div><div className="font-bold">新北市板橋區</div><div className="text-xs opacity-60">藝術大道 101 號</div></div>
+                        </div>
+                        <div className="flex gap-4">
+                            <Icon name="Mail" className="text-accent" />
+                            <div><div className="font-bold">hello@niniart.com</div><div className="text-xs opacity-60">歡迎隨時來信</div></div>
+                        </div>
+                        <div className="flex gap-4">
+                            <Icon name="Phone" className="text-accent" />
+                            <div><div className="font-bold">02-2345-6789</div><div className="text-xs opacity-60">週二至週日 10:00-19:00</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div className="p-12 md:w-3/5">
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                        <input className="p-3 bg-stone-50 border border-line rounded-xl outline-none" placeholder="姓名" />
+                        <input className="p-3 bg-stone-50 border border-line rounded-xl outline-none" placeholder="聯絡電話" />
+                    </div>
+                    <input className="w-full p-3 bg-stone-50 border border-line rounded-xl outline-none mb-4" placeholder="電子郵件" />
+                    <textarea className="w-full p-3 bg-stone-50 border border-line rounded-xl outline-none mb-6 h-32" placeholder="請描述您的需求..." />
+                    <button className="w-full py-4 bg-accent text-white font-black rounded-xl shadow-lg shadow-accent/30">發送訊息</button>
+                </div>
+            </motion.div>
+        );
+
+        // --- 子頁面：會員中心 ---
+        const MemberView = ({ user, isAdmin, onVerify, artworks, onLogin }) => {
+            const [pwd, setPwd] = useState("");
+            const [showAddArt, setShowAddArt] = useState(false);
+            const [newArt, setNewArt] = useState({ title: '', artist: '', category: '油畫', imageUrl: '', description: '' });
+
+            const handleAddArt = async () => {
+                if(!newArt.imageUrl || !newArt.title) return alert("請填寫完整資訊");
+                await window.fb.addDoc(window.fb.collection(window.db, 'artworks'), {
+                    ...newArt,
+                    createdBy: user.uid,
+                    createdByName: user.displayName,
+                    createdAt: window.fb.serverTimestamp()
+                });
+                setShowAddArt(false);
+                setNewArt({ title: '', artist: '', category: '油畫', imageUrl: '', description: '' });
+                alert("作品上傳成功！");
+            };
+
+            if (!user) return (
+                <div className="py-20 text-center">
+                    <div className="w-20 h-20 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-6 text-stone-300"><Icon name="Lock" size={32}/></div>
+                    <h2 className="text-2xl font-black mb-4">請先登入</h2>
+                    <p className="text-muted mb-8">登入後即可上傳作品或管理教室內容。</p>
+                    <button onClick={onLogin} className="px-10 py-4 bg-ink text-white rounded-full font-bold">Google 快速登入</button>
+                </div>
+            );
+
+            return (
+                <div className="max-w-4xl mx-auto">
+                    <div className="p-8 rounded-[2.5rem] bg-white border border-line shadow-sm mb-12 flex flex-col md:flex-row items-center gap-8">
+                        <img src={user.photoURL} className="w-24 h-24 rounded-full border-4 border-accent/10" alt="avatar" />
+                        <div className="text-center md:text-left flex-grow">
+                            <h2 className="text-2xl font-black text-ink mb-1">{user.displayName}</h2>
+                            <p className="text-muted text-sm mb-4">{user.email}</p>
+                            <div className="flex justify-center md:justify-start gap-4">
+                                <span className="px-4 py-1.5 rounded-full bg-stone-100 text-muted text-xs font-bold">一般學員</span>
+                                {isAdmin && <span className="px-4 py-1.5 rounded-full bg-rose-50 text-rose-500 text-xs font-bold border border-rose-100">管理人員</span>}
+                            </div>
+                        </div>
+                        {!isAdmin && (
+                            <div className="bg-stone-50 p-4 rounded-2xl border border-line">
+                                <p className="text-[10px] font-black text-muted uppercase mb-2">管理者驗證</p>
+                                <div className="flex gap-2">
+                                    <input type="password" value={pwd} onChange={e=>setPwd(e.target.value)} className="w-24 p-2 bg-white border border-line rounded-lg text-xs" placeholder="密碼" />
+                                    <button onClick={()=>onVerify(pwd)} className="px-3 py-2 bg-ink text-white rounded-lg text-xs font-bold">確認</button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="flex justify-between items-center mb-8">
+                        <h3 className="text-xl font-black">我的創作 / 作品管理</h3>
+                        <button onClick={()=>setShowAddArt(true)} className="flex items-center gap-2 px-6 py-3 bg-accent text-white rounded-xl font-bold text-sm shadow-lg shadow-accent/20">
+                            <Icon name="Upload" size={18}/> 上傳新作品
+                        </button>
+                    </div>
+
+                    {showAddArt && (
+                        <div className="fixed inset-0 z-[60] bg-ink/60 backdrop-blur-sm flex items-center justify-center p-6">
+                            <motion.div initial={{scale:0.9, opacity:0}} animate={{scale:1, opacity:1}} className="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl overflow-y-auto max-h-[90vh]">
+                                <h3 className="text-xl font-black mb-6">發佈作品到畫廊</h3>
+                                <div className="space-y-4">
+                                    <div><label className="text-xs font-bold text-muted mb-1 block">作品標題</label>
+                                    <input className="w-full p-3 border border-line rounded-xl outline-none focus:border-accent" placeholder="例如：夏日的向日葵" value={newArt.title} onChange={e=>setNewArt({...newArt, title: e.target.value})} /></div>
+                                    
+                                    <div><label className="text-xs font-bold text-muted mb-1 block">小畫家姓名</label>
+                                    <input className="w-full p-3 border border-line rounded-xl outline-none focus:border-accent" placeholder="例如：妮妮" value={newArt.artist} onChange={e=>setNewArt({...newArt, artist: e.target.value})} /></div>
+                                    
+                                    <div><label className="text-xs font-bold text-muted mb-1 block">作品類型</label>
+                                    <select className="w-full p-3 border border-line rounded-xl outline-none focus:border-accent" value={newArt.category} onChange={e=>setNewArt({...newArt, category: e.target.value})}>
+                                        <option>油畫</option><option>水彩</option><option>素描</option><option>多媒材</option>
+                                    </select></div>
+                                    
+                                    <div><label className="text-xs font-bold text-muted mb-1 block">圖片連結 (URL)</label>
+                                    <input className="w-full p-3 border border-line rounded-xl outline-none focus:border-accent" placeholder="請貼上圖片網址" value={newArt.imageUrl} onChange={e=>setNewArt({...newArt, imageUrl: e.target.value})} /></div>
+                                    
+                                    <div><label className="text-xs font-bold text-muted mb-1 block">作品心得</label>
+                                    <textarea className="w-full p-3 border border-line rounded-xl outline-none focus:border-accent h-24" placeholder="分享一下創作的心情..." value={newArt.description} onChange={e=>setNewArt({...newArt, description: e.target.value})} /></div>
+                                    
+                                    <div className="flex gap-3 pt-4">
+                                        <button onClick={handleAddArt} className="flex-1 py-4 bg-accent text-white font-black rounded-xl">確認上傳</button>
+                                        <button onClick={()=>setShowAddArt(false)} className="px-8 py-4 bg-stone-100 text-muted font-bold rounded-xl">取消</button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </div>
+                    )}
+                    
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {artworks.filter(a => a.createdBy === user.uid).map(art => (
+                            <div key={art.id} className="aspect-square rounded-2xl overflow-hidden border border-line relative group">
+                                <img src={art.imageUrl} className="w-full h-full object-cover" />
+                                <div className="absolute inset-0 bg-ink/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <span className="text-white font-bold text-xs">已發佈</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
 </body>
 </html>
+--- END OF FILE index.html ---
