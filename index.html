@@ -4,9 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>妮妮美術室 NiNi Art Studio - 官方網站</title>
+    <title>妮妮美術室 NiNi Art Studio - 管理系統</title>
     
-    <!-- 載入核心庫 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -21,10 +20,7 @@
                         'accent-deep': '#b5835a',
                         line: 'rgba(45, 39, 35, 0.08)',
                     },
-                    boxShadow: {
-                        'art': '0 20px 40px rgba(0,0,0,0.06)',
-                        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
-                    }
+                    boxShadow: { 'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)' }
                 }
             }
         }
@@ -38,30 +34,24 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
-        body { 
-            font-family: 'Noto Sans TC', sans-serif; 
-            background-color: #f8f6f2;
-            background-image: 
-                radial-gradient(circle at 0% 0%, rgba(212, 163, 115, 0.15) 0%, transparent 35%),
-                radial-gradient(circle at 100% 100%, rgba(181, 131, 90, 0.1) 0%, transparent 35%);
-            background-attachment: fixed;
-        }
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f8f6f2; }
         .serif { font-family: 'Noto Serif TC', serif; }
-        .glass { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #d4a373; border-radius: 50%; width: 20px; height: 20px; animate: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 
-    <!-- Firebase 整合 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, deleteDoc, doc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, deleteDoc, doc, updateDoc, setDoc, getDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAme6CI2tDRgjcFhVf21w9neEKycfaCPxM",
             authDomain: "nini-learning-system.firebaseapp.com",
             projectId: "nini-learning-system",
-            storageBucket: "nini-learning-system.firebasestorage.app",
+            storageBucket: "nini-learning-system.appspot.com",
             messagingSenderId: "688657476620",
             appId: "1:688657476620:web:48a91c03d198731aa8d229"
         };
@@ -69,459 +59,356 @@
         const app = initializeApp(firebaseConfig);
         window.auth = getAuth(app);
         window.db = getFirestore(app);
+        window.storage = getStorage(app);
         window.googleProvider = new GoogleAuthProvider();
-        window.fb = { signInWithPopup, onAuthStateChanged, signOut, collection, addDoc, deleteDoc, doc, query, orderBy, onSnapshot, serverTimestamp };
+        window.fb = { 
+            signInWithPopup, onAuthStateChanged, signOut, collection, addDoc, deleteDoc, 
+            doc, updateDoc, setDoc, getDoc, query, orderBy, onSnapshot, serverTimestamp,
+            ref, uploadBytes, getDownloadURL
+        };
     </script>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef, useMemo } = React;
+        const { useState, useEffect, useRef } = React;
         const { motion, AnimatePresence } = window.Motion;
 
-        // --- 通用元件：圖示 ---
         const Icon = ({ name, size = 20, className = "" }) => {
             const iconRef = useRef(null);
             useEffect(() => {
-                if (iconRef.current) {
-                    lucide.createIcons({ targets: [iconRef.current], icons: { [name]: lucide.icons[name] } });
-                }
+                if (iconRef.current) lucide.createIcons({ targets: [iconRef.current], icons: { [name]: lucide.icons[name] } });
             }, [name]);
             return <i ref={iconRef} data-lucide={name} style={{ width: size, height: size }} className={className}></i>;
         };
 
-        // --- 主要應用程式 ---
+        // --- Firebase 工具函數 ---
+        const uploadFile = async (file, path) => {
+            if (!file) return null;
+            const storageRef = window.fb.ref(window.storage, `${path}/${Date.now()}_${file.name}`);
+            const snapshot = await window.fb.uploadBytes(storageRef, file);
+            return await window.fb.getDownloadURL(snapshot.ref);
+        };
+
         function App() {
             const [currentPage, setCurrentPage] = useState('home');
             const [user, setUser] = useState(null);
             const [isAdmin, setIsAdmin] = useState(false);
+            const [studioInfo, setStudioInfo] = useState({ 
+                logoUrl: 'https://cdn-icons-png.flaticon.com/512/2970/2970785.png', 
+                address: '新北市板橋區藝術大道 101 號', 
+                phone: '02-2345-6789',
+                email: 'hello@niniart.com'
+            });
+            const [teachers, setTeachers] = useState([]);
             const [artworks, setArtworks] = useState([]);
-            const [courses, setCourses] = useState([]);
             const [loading, setLoading] = useState(true);
 
-            // 初始化與監聽資料
             useEffect(() => {
+                // 1. 監聽 Auth
                 const unsubAuth = window.fb.onAuthStateChanged(window.auth, (u) => {
                     setUser(u);
-                    // 檢查 Session 中的 Admin 狀態
                     if (sessionStorage.getItem('isNiNiAdmin') === 'true') setIsAdmin(true);
                     setLoading(false);
                 });
 
-                // 監聽作品
+                // 2. 監聽工作室資訊
+                const unsubInfo = window.fb.onSnapshot(window.fb.doc(window.db, 'settings', 'studio'), (doc) => {
+                    if (doc.exists()) setStudioInfo(doc.data());
+                });
+
+                // 3. 監聽老師列表
+                const unsubTeachers = window.fb.onSnapshot(window.fb.collection(window.db, 'teachers'), (snap) => {
+                    setTeachers(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+                });
+
+                // 4. 監聽作品
                 const qArt = window.fb.query(window.fb.collection(window.db, 'artworks'), window.fb.orderBy('createdAt', 'desc'));
                 const unsubArt = window.fb.onSnapshot(qArt, (snap) => {
                     setArtworks(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
                 });
 
-                // 監聽課程
-                const qCourse = window.fb.query(window.fb.collection(window.db, 'courses'), window.fb.orderBy('createdAt', 'asc'));
-                const unsubCourse = window.fb.onSnapshot(qCourse, (snap) => {
-                    setCourses(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-                });
-
-                return () => { unsubAuth(); unsubArt(); unsubCourse(); };
+                return () => { unsubAuth(); unsubInfo(); unsubTeachers(); unsubArt(); };
             }, []);
 
-            const handleLogin = async () => {
-                try { await window.fb.signInWithPopup(window.auth, window.googleProvider); } 
-                catch (e) { alert("登入失敗"); }
-            };
-
-            const handleLogout = () => {
-                window.fb.signOut(window.auth);
-                setIsAdmin(false);
-                sessionStorage.removeItem('isNiNiAdmin');
-            };
-
-            const verifyAdmin = (pwd) => {
-                if (pwd === "720205") {
-                    setIsAdmin(true);
-                    sessionStorage.setItem('isNiNiAdmin', 'true');
-                    alert("管理者模式已啟動");
-                } else {
-                    alert("密碼錯誤");
+            const handleLogoChange = async (e) => {
+                if (!isAdmin) return;
+                const file = e.target.files[0];
+                if (file) {
+                    const url = await uploadFile(file, 'branding');
+                    await window.fb.setDoc(window.fb.doc(window.db, 'settings', 'studio'), { ...studioInfo, logoUrl: url });
                 }
             };
 
-            if (loading) return (
-                <div className="min-h-screen flex flex-col items-center justify-center bg-bg">
-                    <div className="w-12 h-12 border-4 border-accent border-t-transparent rounded-full animate-spin mb-4"></div>
-                    <div className="text-muted font-bold tracking-widest animate-pulse">NINI ART STUDIO</div>
-                </div>
-            );
+            const updateInfo = async (field, value) => {
+                const newData = { ...studioInfo, [field]: value };
+                setStudioInfo(newData);
+                await window.fb.setDoc(window.fb.doc(window.db, 'settings', 'studio'), newData);
+            };
+
+            if (loading) return <div className="h-screen flex items-center justify-center">載入中...</div>;
 
             return (
                 <div className="min-h-screen flex flex-col">
-                    {/* Navbar */}
-                    <nav className="fixed top-0 w-full z-50 glass border-b border-line px-6 py-4">
+                    <nav className="fixed top-0 w-full z-50 glass border-b border-line px-6 py-3">
                         <div className="max-w-7xl mx-auto flex items-center justify-between">
-                            <div className="flex items-center gap-4 cursor-pointer" onClick={() => setCurrentPage('home')}>
-                                <div className="w-11 h-11 bg-accent rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-accent/30">妮</div>
-                                <div className="hidden md:block">
-                                    <h1 className="serif text-xl font-black text-ink tracking-tight">妮妮美術室</h1>
-                                    <p className="text-[10px] font-bold text-muted uppercase tracking-[0.2em]">NiNi Art Studio</p>
+                            <div className="flex items-center gap-4 cursor-pointer relative group" onClick={() => setCurrentPage('home')}>
+                                <div className="relative w-12 h-12">
+                                    <img src={studioInfo.logoUrl} className="w-full h-full object-contain" />
+                                    {isAdmin && (
+                                        <label className="absolute inset-0 bg-black/40 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
+                                            <Icon name="Camera" size={16} className="text-white"/>
+                                            <input type="file" className="hidden" accept="image/*" onChange={handleLogoChange} />
+                                        </label>
+                                    )}
+                                </div>
+                                <div>
+                                    <h1 className="serif text-xl font-black text-ink">妮妮美術室</h1>
+                                    <p className="text-[10px] font-bold text-muted uppercase tracking-widest">NiNi Art Studio</p>
                                 </div>
                             </div>
                             
-                            <div className="hidden lg:flex items-center gap-2">
-                                {[
-                                    { id: 'home', label: '首頁', icon: 'Home' },
-                                    { id: 'courses', label: '課程資訊', icon: 'Book' },
-                                    { id: 'gallery', label: '學生畫廊', icon: 'Palette' },
-                                    { id: 'contact', label: '聯絡我們', icon: 'Phone' },
-                                    { id: 'member', label: '會員中心', icon: 'User' },
-                                ].map(item => (
-                                    <button 
-                                        key={item.id}
-                                        onClick={() => setCurrentPage(item.id)}
-                                        className={`px-5 py-2 rounded-full text-sm font-bold transition-all flex items-center gap-2 ${currentPage === item.id ? 'bg-accent text-white shadow-md shadow-accent/20' : 'text-muted hover:bg-stone-100'}`}
-                                    >
-                                        <Icon name={item.icon} size={16} /> {item.label}
+                            <div className="hidden lg:flex items-center gap-1">
+                                {['home', 'courses', 'gallery', 'contact', 'member'].map(id => (
+                                    <button key={id} onClick={() => setCurrentPage(id)} className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${currentPage === id ? 'bg-accent text-white' : 'text-muted hover:bg-stone-100'}`}>
+                                        {id === 'home' ? '首頁' : id === 'courses' ? '課程' : id === 'gallery' ? '學生畫廊' : id === 'contact' ? '聯絡我們' : '會員'}
                                     </button>
                                 ))}
-                                {isAdmin && (
-                                    <div className="ml-4 px-3 py-1 rounded-md bg-rose-50 text-rose-500 text-[10px] font-black border border-rose-100">管理者模式</div>
-                                )}
                             </div>
 
                             <div className="flex items-center gap-3">
                                 {user ? (
-                                    <div className="flex items-center gap-3">
-                                        <img src={user.photoURL} className="w-9 h-9 rounded-full border border-line" alt="user" />
-                                        <button onClick={handleLogout} className="p-2 hover:bg-rose-50 text-muted hover:text-rose-500 rounded-full transition-colors"><Icon name="LogOut" size={20}/></button>
-                                    </div>
+                                    <img src={user.photoURL} className="w-9 h-9 rounded-full border border-line" onClick={() => setCurrentPage('member')} />
                                 ) : (
-                                    <button onClick={handleLogin} className="px-6 py-2.5 rounded-full bg-ink text-white text-sm font-bold hover:opacity-90 transition-all">登入</button>
+                                    <button onClick={() => window.fb.signInWithPopup(window.auth, window.googleProvider)} className="px-5 py-2 rounded-full bg-ink text-white text-xs font-bold">登入</button>
                                 )}
                             </div>
                         </div>
                     </nav>
 
-                    {/* Main Content */}
-                    <main className="flex-grow pt-28 pb-20 px-6">
-                        <div className="max-w-7xl mx-auto">
-                            <AnimatePresence mode="wait">
-                                {currentPage === 'home' && <HomeView key="home" onStart={() => setCurrentPage('courses')} />}
-                                {currentPage === 'courses' && <CoursesView key="courses" courses={courses} isAdmin={isAdmin} />}
-                                {currentPage === 'gallery' && <GalleryView key="gallery" artworks={artworks} isAdmin={isAdmin} />}
-                                {currentPage === 'contact' && <ContactView key="contact" />}
-                                {currentPage === 'member' && <MemberView key="member" user={user} isAdmin={isAdmin} onVerify={verifyAdmin} artworks={artworks} onLogin={handleLogin} />}
-                            </AnimatePresence>
-                        </div>
-                    </main>
+                    <main className="flex-grow pt-28 pb-20 px-6 max-w-7xl mx-auto w-full">
+                        <AnimatePresence mode="wait">
+                            {currentPage === 'home' && (
+                                <motion.div initial={{opacity:0}} animate={{opacity:1}} className="text-center py-20">
+                                    <h2 className="serif text-6xl text-ink mb-6 italic">Where Creativity Blooms</h2>
+                                    <p className="text-muted text-xl max-w-2xl mx-auto mb-12">這是一個充滿溫度的空間，讓每個孩子都能在畫筆下發現屬於自己的色彩世界。</p>
+                                    <button onClick={()=>setCurrentPage('gallery')} className="px-12 py-5 bg-accent text-white rounded-2xl font-black shadow-xl shadow-accent/30 hover:-translate-y-1 transition-all">參觀小小畫廊</button>
+                                </motion.div>
+                            )}
 
-                    {/* Footer */}
-                    <footer className="py-12 border-t border-line bg-white/50">
-                        <div className="max-w-7xl mx-auto px-6 text-center">
-                            <div className="serif text-2xl font-black text-ink mb-4 italic">NiNi Art.</div>
-                            <p className="text-muted text-sm font-medium tracking-widest">讓藝術融入生活，用畫筆記錄純粹</p>
-                            <div className="mt-8 pt-8 border-t border-line/50 flex flex-col md:flex-row justify-between items-center gap-4">
-                                <p className="text-muted text-[11px] font-bold opacity-60">© 2026 NINI ART STUDIO. ALL RIGHTS RESERVED.</p>
-                                <div className="flex gap-6">
-                                    <a href="#" className="text-muted hover:text-accent transition-colors"><Icon name="Instagram" size={18}/></a>
-                                    <a href="#" className="text-muted hover:text-accent transition-colors"><Icon name="Facebook" size={18}/></a>
+                            {currentPage === 'gallery' && (
+                                <GallerySection artworks={artworks} isAdmin={isAdmin} user={user} />
+                            )}
+
+                            {currentPage === 'contact' && (
+                                <ContactSection 
+                                    info={studioInfo} 
+                                    isAdmin={isAdmin} 
+                                    onUpdate={updateInfo} 
+                                    teachers={teachers} 
+                                />
+                            )}
+
+                            {currentPage === 'member' && (
+                                <div className="max-w-md mx-auto py-12">
+                                    {!user ? (
+                                        <div className="text-center">請先登入</div>
+                                    ) : (
+                                        <div className="bg-white p-8 rounded-3xl border border-line">
+                                            <div className="flex items-center gap-4 mb-8">
+                                                <img src={user.photoURL} className="w-16 h-16 rounded-full" />
+                                                <div>
+                                                    <div className="font-black text-lg">{user.displayName}</div>
+                                                    <div className="text-xs text-muted">{isAdmin ? '👑 網站管理員' : '一般會員'}</div>
+                                                </div>
+                                            </div>
+                                            {!isAdmin && (
+                                                <div className="pt-4 border-t">
+                                                    <p className="text-xs font-bold text-muted mb-2">管理者驗證</p>
+                                                    <input type="password" placeholder="輸入密碼" className="w-full p-3 border border-line rounded-xl mb-3" onKeyDown={(e) => {
+                                                        if(e.key === 'Enter' && e.target.value === '720205') {
+                                                            setIsAdmin(true);
+                                                            sessionStorage.setItem('isNiNiAdmin', 'true');
+                                                            alert('已開啟管理者模式');
+                                                        }
+                                                    }} />
+                                                </div>
+                                            )}
+                                            <button onClick={() => {window.fb.signOut(window.auth); setIsAdmin(false); sessionStorage.removeItem('isNiNiAdmin');}} className="w-full py-3 text-rose-500 font-bold border border-rose-100 rounded-xl hover:bg-rose-50">登出帳號</button>
+                                        </div>
+                                    )}
                                 </div>
-                            </div>
-                        </div>
-                    </footer>
+                            )}
+
+                            {['courses'].includes(currentPage) && <div className="text-center py-20 text-muted">課程資訊內容製作中...</div>}
+                        </AnimatePresence>
+                    </main>
                 </div>
             );
         }
 
-        // --- 子頁面：首頁 ---
-        const HomeView = ({ onStart }) => (
-            <motion.div initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} exit={{opacity:0, y:-20}} className="relative">
-                <div className="grid lg:grid-cols-2 gap-12 items-center">
-                    <div>
-                        <motion.div initial={{opacity:0, x:-20}} animate={{opacity:1, x:0}} transition={{delay:0.2}} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent-deep text-xs font-black mb-8 border border-accent/10">
-                            <span className="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
-                            NEW SEMESTER 2026 現正招生中
-                        </motion.div>
-                        <h2 className="serif text-5xl md:text-7xl text-ink leading-[1.15] mb-8">
-                            釋放孩子的<br/><span className="text-accent underline decoration-stone-200 underline-offset-8">色彩天賦</span>
-                        </h2>
-                        <p className="text-muted text-lg md:text-xl leading-relaxed mb-10 max-w-lg">
-                            我們不只教畫畫，更在乎觀察與感受。提供專業的油畫、水彩、多媒材課程，為不同年齡層的孩子打造溫馨的創作空間。
-                        </p>
-                        <div className="flex flex-wrap gap-4">
-                            <button onClick={onStart} className="px-10 py-5 rounded-2xl bg-accent text-white font-black shadow-2xl shadow-accent/40 hover:-translate-y-1 transition-all">開始探索課程</button>
-                            <button className="px-10 py-5 rounded-2xl bg-white border border-line text-ink font-black hover:bg-stone-50 transition-all flex items-center gap-2">
-                                <Icon name="PlayCircle" /> 預覽教室環境
-                            </button>
-                        </div>
-                    </div>
-                    <div className="relative">
-                        <div className="aspect-[4/5] rounded-[3rem] overflow-hidden shadow-art rotate-2">
-                            <img src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=800&q=80" className="w-full h-full object-cover" alt="Art" />
-                        </div>
-                        <div className="absolute -bottom-6 -left-6 bg-white p-6 rounded-3xl shadow-xl border border-line flex items-center gap-4">
-                            <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center font-black">5.0</div>
-                            <div>
-                                <div className="font-black text-ink">專業師資認證</div>
-                                <div className="text-xs text-muted">超過 200+ 學員好評推薦</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </motion.div>
-        );
+        // --- 子組件：畫廊區塊 ---
+        const GallerySection = ({ artworks, isAdmin, user }) => {
+            const [isUploading, setIsUploading] = useState(false);
+            const [uploadProgress, setUploadProgress] = useState(false);
 
-        // --- 子頁面：課程資訊 ---
-        const CoursesView = ({ courses, isAdmin }) => {
-            const [isAdding, setIsAdding] = useState(false);
-            const [newCourse, setNewCourse] = useState({ title: '', age: '', price: '', desc: '', icon: 'Palette' });
+            const handleFileUpload = async (e) => {
+                const file = e.target.files[0];
+                const title = prompt("請輸入作品標題：");
+                const artist = prompt("請輸入創作者姓名：");
+                if (!file || !title || !artist) return;
 
-            const addCourse = async () => {
-                if (!newCourse.title || !newCourse.price) return alert("請填寫完整");
-                await window.fb.addDoc(window.fb.collection(window.db, 'courses'), { ...newCourse, createdAt: window.fb.serverTimestamp() });
-                setIsAdding(false);
-                setNewCourse({ title: '', age: '', price: '', desc: '', icon: 'Palette' });
-            };
-
-            const deleteCourse = async (id) => {
-                if(confirm("確定刪除此課程？")) await window.fb.deleteDoc(window.fb.doc(window.db, 'courses', id));
+                setUploadProgress(true);
+                try {
+                    const url = await uploadFile(file, 'artworks');
+                    await window.fb.addDoc(window.fb.collection(window.db, 'artworks'), {
+                        title, artist, imageUrl: url, category: '精選作品',
+                        createdBy: user?.uid || 'guest',
+                        createdAt: window.fb.serverTimestamp()
+                    });
+                } catch (err) { alert('上傳失敗'); }
+                setUploadProgress(false);
             };
 
             return (
-                <motion.div initial={{opacity:0}} animate={{opacity:1}} className="space-y-12">
+                <div className="space-y-12">
                     <div className="flex justify-between items-end">
                         <div>
-                            <h2 className="serif text-4xl font-black text-ink mb-4">藝術探索課程</h2>
-                            <p className="text-muted">根據年齡與程度設計，漸進式啟發美感與技巧。</p>
+                            <h2 className="serif text-4xl font-black text-ink mb-2">小小藝術家畫廊</h2>
+                            <p className="text-muted">在這裡，每一幅畫都述說著一個純真的故事。</p>
                         </div>
-                        {isAdmin && (
-                            <button onClick={() => setIsAdding(true)} className="flex items-center gap-2 px-6 py-3 bg-ink text-white rounded-xl font-bold text-sm">
-                                <Icon name="Plus" size={18}/> 新增課程
-                            </button>
-                        )}
+                        <label className={`flex items-center gap-2 px-6 py-3 bg-ink text-white rounded-xl font-bold cursor-pointer hover:bg-accent transition-all ${uploadProgress ? 'opacity-50 pointer-events-none' : ''}`}>
+                            <Icon name={uploadProgress ? "Loader" : "Upload"} size={18} className={uploadProgress ? 'animate-spin' : ''}/>
+                            {uploadProgress ? '上傳中...' : '上傳作品'}
+                            <input type="file" className="hidden" accept="image/png, image/jpeg, image/jpg" onChange={handleFileUpload} />
+                        </label>
                     </div>
 
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {courses.map(course => (
-                            <div key={course.id} className="group p-8 rounded-[2.5rem] bg-white border border-line shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all relative overflow-hidden">
-                                <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:scale-110 transition-transform">
-                                    <Icon name={course.icon || "Palette"} size={120} />
+                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                        {artworks.map(art => (
+                            <motion.div layout key={art.id} className="group bg-white p-4 rounded-[2rem] border border-line shadow-sm hover:shadow-xl transition-all">
+                                <div className="aspect-square rounded-[1.5rem] overflow-hidden mb-4 relative">
+                                    <img src={art.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                    {isAdmin && (
+                                        <button onClick={() => window.fb.deleteDoc(window.fb.doc(window.db, 'artworks', art.id))} className="absolute top-2 right-2 p-2 bg-white/90 rounded-full text-rose-500 shadow-lg opacity-0 group-hover:opacity-100">
+                                            <Icon name="Trash2" size={16}/>
+                                        </button>
+                                    )}
                                 </div>
-                                <div className="relative z-10">
-                                    <div className="w-14 h-14 rounded-2xl bg-accent/10 text-accent flex items-center justify-center mb-6">
-                                        <Icon name={course.icon || "Palette"} size={28} />
-                                    </div>
-                                    <h4 className="text-2xl font-black text-ink mb-2">{course.title}</h4>
-                                    <span className="inline-block px-3 py-1 rounded-full bg-stone-100 text-muted text-[11px] font-bold mb-4">{course.age}</span>
-                                    <p className="text-muted text-sm leading-relaxed mb-8">{course.desc}</p>
-                                    <div className="flex items-center justify-between pt-6 border-t border-line">
-                                        <div className="font-black text-accent text-xl">{course.price}</div>
+                                <h4 className="font-black text-ink">{art.title}</h4>
+                                <p className="text-xs text-muted italic">By {art.artist}</p>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        // --- 子組件：聯絡與老師管理 ---
+        const ContactSection = ({ info, isAdmin, onUpdate, teachers }) => {
+            const [isAdding, setIsAdding] = useState(false);
+            const [newTeacher, setNewTeacher] = useState({ name: '', title: '', line: '', avatar: '' });
+
+            const addTeacher = async () => {
+                if(!newTeacher.name) return;
+                await window.fb.addDoc(window.fb.collection(window.db, 'teachers'), newTeacher);
+                setIsAdding(false);
+                setNewTeacher({ name: '', title: '', line: '', avatar: '' });
+            };
+
+            const handleTeacherAvatar = async (e) => {
+                const url = await uploadFile(e.target.files[0], 'teachers');
+                setNewTeacher({ ...newTeacher, avatar: url });
+            };
+
+            return (
+                <div className="space-y-20">
+                    <div className="grid lg:grid-cols-2 gap-12">
+                        <div className="bg-ink p-12 rounded-[3rem] text-white">
+                            <h2 className="serif text-4xl mb-12">預約參觀</h2>
+                            <div className="space-y-10">
+                                <div className="flex gap-5">
+                                    <Icon name="MapPin" className="text-accent mt-1" />
+                                    <div className="flex-grow">
+                                        <div className="text-[10px] font-bold opacity-40 uppercase mb-1">Studio Address</div>
                                         {isAdmin ? (
-                                            <button onClick={() => deleteCourse(course.id)} className="p-2 text-rose-300 hover:text-rose-500"><Icon name="Trash2" size={18}/></button>
+                                            <input value={info.address} onChange={e => onUpdate('address', e.target.value)} className="bg-white/10 w-full p-2 rounded text-sm outline-none" />
                                         ) : (
-                                            <button className="text-ink font-bold text-sm flex items-center gap-2 group-hover:gap-4 transition-all">立即報名 <Icon name="ArrowRight" size={14}/></button>
+                                            <div className="font-bold text-lg">{info.address}</div>
                                         )}
                                     </div>
                                 </div>
+                                <div className="flex gap-5">
+                                    <Icon name="Phone" className="text-accent mt-1" />
+                                    <div className="flex-grow">
+                                        <div className="text-[10px] font-bold opacity-40 uppercase mb-1">Contact Phone</div>
+                                        {isAdmin ? (
+                                            <input value={info.phone} onChange={e => onUpdate('phone', e.target.value)} className="bg-white/10 w-full p-2 rounded text-sm outline-none" />
+                                        ) : (
+                                            <div className="font-bold text-lg">{info.phone}</div>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="flex gap-5">
+                                    <Icon name="Mail" className="text-accent mt-1" />
+                                    <div className="flex-grow">
+                                        <div className="text-[10px] font-bold opacity-40 uppercase mb-1">Email Support</div>
+                                        <div className="font-bold text-lg">{info.email}</div>
+                                    </div>
+                                </div>
                             </div>
-                        ))}
+                        </div>
+
+                        <div>
+                            <div className="flex justify-between items-center mb-8">
+                                <h3 className="serif text-3xl text-ink font-black italic underline decoration-accent underline-offset-8">認識老師們</h3>
+                                {isAdmin && (
+                                    <button onClick={() => setIsAdding(true)} className="p-2 bg-stone-100 rounded-full hover:bg-accent hover:text-white transition-all"><Icon name="Plus" /></button>
+                                )}
+                            </div>
+                            <div className="grid grid-cols-1 gap-6">
+                                {teachers.map(t => (
+                                    <div key={t.id} className="flex items-center gap-6 p-6 bg-white rounded-3xl border border-line group">
+                                        <img src={t.avatar || 'https://cdn-icons-png.flaticon.com/512/1998/1998592.png'} className="w-20 h-20 rounded-2xl object-cover bg-stone-50" />
+                                        <div className="flex-grow">
+                                            <h4 className="font-black text-xl text-ink">{t.name}</h4>
+                                            <p className="text-sm text-muted mb-2">{t.title}</p>
+                                            <a href={`https://line.me/ti/p/${t.line}`} className="inline-flex items-center gap-2 text-xs font-bold text-accent">
+                                                <Icon name="MessageCircle" size={14}/> 聯繫老師 (LINE)
+                                            </a>
+                                        </div>
+                                        {isAdmin && (
+                                            <button onClick={() => window.fb.deleteDoc(window.fb.doc(window.db, 'teachers', t.id))} className="opacity-0 group-hover:opacity-100 text-rose-300 hover:text-rose-500 transition-opacity"><Icon name="X" size={18}/></button>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     </div>
 
                     {isAdding && (
-                        <div className="fixed inset-0 z-[60] bg-ink/40 backdrop-blur-sm flex items-center justify-center p-6">
-                            <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl">
-                                <h3 className="text-xl font-black mb-6">新增課程內容</h3>
+                        <div className="fixed inset-0 z-[100] bg-black/60 flex items-center justify-center p-6 backdrop-blur-sm">
+                            <motion.div initial={{scale:0.9}} animate={{scale:1}} className="bg-white p-8 rounded-[2rem] max-w-sm w-full">
+                                <h4 className="text-xl font-black mb-6">新增老師資料</h4>
                                 <div className="space-y-4">
-                                    <input className="w-full p-3 border border-line rounded-xl outline-none focus:border-accent" placeholder="課程名稱" value={newCourse.title} onChange={e=>setNewCourse({...newCourse, title: e.target.value})} />
-                                    <input className="w-full p-3 border border-line rounded-xl outline-none focus:border-accent" placeholder="年齡層 (例: 5-8歲)" value={newCourse.age} onChange={e=>setNewCourse({...newCourse, age: e.target.value})} />
-                                    <input className="w-full p-3 border border-line rounded-xl outline-none focus:border-accent" placeholder="價格 (例: $4,500 / 8堂)" value={newCourse.price} onChange={e=>setNewCourse({...newCourse, price: e.target.value})} />
-                                    <textarea className="w-full p-3 border border-line rounded-xl outline-none focus:border-accent h-32" placeholder="課程簡介" value={newCourse.desc} onChange={e=>setNewCourse({...newCourse, desc: e.target.value})} />
-                                    <div className="flex gap-3 pt-2">
-                                        <button onClick={addCourse} className="flex-1 py-3 bg-accent text-white font-black rounded-xl">儲存發佈</button>
+                                    <div className="flex justify-center mb-4">
+                                        <label className="w-20 h-20 bg-stone-100 rounded-2xl flex items-center justify-center cursor-pointer overflow-hidden border-2 border-dashed border-stone-200">
+                                            {newTeacher.avatar ? <img src={newTeacher.avatar} className="w-full h-full object-cover" /> : <Icon name="UserPlus" className="text-stone-300"/>}
+                                            <input type="file" className="hidden" onChange={handleTeacherAvatar} />
+                                        </label>
+                                    </div>
+                                    <input className="w-full p-3 border border-line rounded-xl" placeholder="姓名" value={newTeacher.name} onChange={e=>setNewTeacher({...newTeacher, name:e.target.value})} />
+                                    <input className="w-full p-3 border border-line rounded-xl" placeholder="職稱 (例：專業油畫老師)" value={newTeacher.title} onChange={e=>setNewTeacher({...newTeacher, title:e.target.value})} />
+                                    <input className="w-full p-3 border border-line rounded-xl" placeholder="LINE ID" value={newTeacher.line} onChange={e=>setNewTeacher({...newTeacher, line:e.target.value})} />
+                                    <div className="flex gap-2 pt-4">
+                                        <button onClick={addTeacher} className="flex-1 py-3 bg-accent text-white font-black rounded-xl shadow-lg shadow-accent/20">儲存</button>
                                         <button onClick={()=>setIsAdding(false)} className="px-6 py-3 bg-stone-100 text-muted font-bold rounded-xl">取消</button>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    )}
-                </motion.div>
-            );
-        };
-
-        // --- 子頁面：學生畫廊 ---
-        const GalleryView = ({ artworks, isAdmin }) => {
-            const [filter, setFilter] = useState('全部');
-            const categories = ['全部', '油畫', '水彩', '素描', '多媒材'];
-            
-            const filteredArt = filter === '全部' ? artworks : artworks.filter(a => a.category === filter);
-
-            const deleteArt = async (id) => {
-                if(confirm("確定刪除此作品？")) await window.fb.deleteDoc(window.fb.doc(window.db, 'artworks', id));
-            };
-
-            return (
-                <motion.div initial={{opacity:0}} animate={{opacity:1}}>
-                    <div className="text-center mb-16">
-                        <h2 className="serif text-4xl font-black text-ink mb-6">小小藝術家畫廊</h2>
-                        <div className="flex justify-center gap-2 overflow-x-auto no-scrollbar pb-2">
-                            {categories.map(c => (
-                                <button key={c} onClick={()=>setFilter(c)} className={`px-6 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${filter === c ? 'bg-ink text-white' : 'bg-white border border-line text-muted hover:bg-stone-50'}`}>{c}</button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
-                        {filteredArt.map(art => (
-                            <motion.div layout key={art.id} className="group">
-                                <div className="aspect-[4/5] rounded-[2rem] overflow-hidden bg-stone-100 mb-6 shadow-sm group-hover:shadow-xl transition-all relative">
-                                    <img src={art.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={art.title} />
-                                    {isAdmin && (
-                                        <button onClick={() => deleteArt(art.id)} className="absolute top-4 right-4 p-3 bg-white/90 backdrop-blur rounded-full text-rose-500 shadow-xl opacity-0 group-hover:opacity-100 transition-opacity"><Icon name="Trash2" size={18}/></button>
-                                    )}
-                                </div>
-                                <div className="px-2">
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-accent mb-2 block">{art.category}</span>
-                                    <h4 className="text-xl font-black text-ink mb-1">{art.title}</h4>
-                                    <div className="flex items-center justify-between">
-                                        <p className="text-muted text-sm italic">Artist: {art.artist}</p>
-                                        <p className="text-[10px] text-stone-300 font-bold">{new Date(art.createdAt?.seconds * 1000).toLocaleDateString()}</p>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </div>
-                </motion.div>
-            );
-        };
-
-        // --- 子頁面：聯絡我們 ---
-        const ContactView = () => (
-            <motion.div initial={{opacity:0, scale:0.95}} animate={{opacity:1, scale:1}} className="max-w-4xl mx-auto bg-white rounded-[3rem] shadow-soft border border-line overflow-hidden flex flex-col md:flex-row">
-                <div className="bg-ink p-12 text-white md:w-2/5">
-                    <h2 className="serif text-3xl mb-8">預約參觀</h2>
-                    <div className="space-y-8">
-                        <div className="flex gap-4">
-                            <Icon name="MapPin" className="text-accent" />
-                            <div><div className="font-bold">新北市板橋區</div><div className="text-xs opacity-60">藝術大道 101 號</div></div>
-                        </div>
-                        <div className="flex gap-4">
-                            <Icon name="Mail" className="text-accent" />
-                            <div><div className="font-bold">hello@niniart.com</div><div className="text-xs opacity-60">歡迎隨時來信</div></div>
-                        </div>
-                        <div className="flex gap-4">
-                            <Icon name="Phone" className="text-accent" />
-                            <div><div className="font-bold">02-2345-6789</div><div className="text-xs opacity-60">週二至週日 10:00-19:00</div></div>
-                        </div>
-                    </div>
-                </div>
-                <div className="p-12 md:w-3/5">
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                        <input className="p-3 bg-stone-50 border border-line rounded-xl outline-none" placeholder="姓名" />
-                        <input className="p-3 bg-stone-50 border border-line rounded-xl outline-none" placeholder="聯絡電話" />
-                    </div>
-                    <input className="w-full p-3 bg-stone-50 border border-line rounded-xl outline-none mb-4" placeholder="電子郵件" />
-                    <textarea className="w-full p-3 bg-stone-50 border border-line rounded-xl outline-none mb-6 h-32" placeholder="請描述您的需求..." />
-                    <button className="w-full py-4 bg-accent text-white font-black rounded-xl shadow-lg shadow-accent/30">發送訊息</button>
-                </div>
-            </motion.div>
-        );
-
-        // --- 子頁面：會員中心 ---
-        const MemberView = ({ user, isAdmin, onVerify, artworks, onLogin }) => {
-            const [pwd, setPwd] = useState("");
-            const [showAddArt, setShowAddArt] = useState(false);
-            const [newArt, setNewArt] = useState({ title: '', artist: '', category: '油畫', imageUrl: '', description: '' });
-
-            const handleAddArt = async () => {
-                if(!newArt.imageUrl || !newArt.title) return alert("請填寫完整資訊");
-                await window.fb.addDoc(window.fb.collection(window.db, 'artworks'), {
-                    ...newArt,
-                    createdBy: user.uid,
-                    createdByName: user.displayName,
-                    createdAt: window.fb.serverTimestamp()
-                });
-                setShowAddArt(false);
-                setNewArt({ title: '', artist: '', category: '油畫', imageUrl: '', description: '' });
-                alert("作品上傳成功！");
-            };
-
-            if (!user) return (
-                <div className="py-20 text-center">
-                    <div className="w-20 h-20 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-6 text-stone-300"><Icon name="Lock" size={32}/></div>
-                    <h2 className="text-2xl font-black mb-4">請先登入</h2>
-                    <p className="text-muted mb-8">登入後即可上傳作品或管理教室內容。</p>
-                    <button onClick={onLogin} className="px-10 py-4 bg-ink text-white rounded-full font-bold">Google 快速登入</button>
-                </div>
-            );
-
-            return (
-                <div className="max-w-4xl mx-auto">
-                    <div className="p-8 rounded-[2.5rem] bg-white border border-line shadow-sm mb-12 flex flex-col md:flex-row items-center gap-8">
-                        <img src={user.photoURL} className="w-24 h-24 rounded-full border-4 border-accent/10" alt="avatar" />
-                        <div className="text-center md:text-left flex-grow">
-                            <h2 className="text-2xl font-black text-ink mb-1">{user.displayName}</h2>
-                            <p className="text-muted text-sm mb-4">{user.email}</p>
-                            <div className="flex justify-center md:justify-start gap-4">
-                                <span className="px-4 py-1.5 rounded-full bg-stone-100 text-muted text-xs font-bold">一般學員</span>
-                                {isAdmin && <span className="px-4 py-1.5 rounded-full bg-rose-50 text-rose-500 text-xs font-bold border border-rose-100">管理人員</span>}
-                            </div>
-                        </div>
-                        {!isAdmin && (
-                            <div className="bg-stone-50 p-4 rounded-2xl border border-line">
-                                <p className="text-[10px] font-black text-muted uppercase mb-2">管理者驗證</p>
-                                <div className="flex gap-2">
-                                    <input type="password" value={pwd} onChange={e=>setPwd(e.target.value)} className="w-24 p-2 bg-white border border-line rounded-lg text-xs" placeholder="密碼" />
-                                    <button onClick={()=>onVerify(pwd)} className="px-3 py-2 bg-ink text-white rounded-lg text-xs font-bold">確認</button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="flex justify-between items-center mb-8">
-                        <h3 className="text-xl font-black">我的創作 / 作品管理</h3>
-                        <button onClick={()=>setShowAddArt(true)} className="flex items-center gap-2 px-6 py-3 bg-accent text-white rounded-xl font-bold text-sm shadow-lg shadow-accent/20">
-                            <Icon name="Upload" size={18}/> 上傳新作品
-                        </button>
-                    </div>
-
-                    {showAddArt && (
-                        <div className="fixed inset-0 z-[60] bg-ink/60 backdrop-blur-sm flex items-center justify-center p-6">
-                            <motion.div initial={{scale:0.9, opacity:0}} animate={{scale:1, opacity:1}} className="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl overflow-y-auto max-h-[90vh]">
-                                <h3 className="text-xl font-black mb-6">發佈作品到畫廊</h3>
-                                <div className="space-y-4">
-                                    <div><label className="text-xs font-bold text-muted mb-1 block">作品標題</label>
-                                    <input className="w-full p-3 border border-line rounded-xl outline-none focus:border-accent" placeholder="例如：夏日的向日葵" value={newArt.title} onChange={e=>setNewArt({...newArt, title: e.target.value})} /></div>
-                                    
-                                    <div><label className="text-xs font-bold text-muted mb-1 block">小畫家姓名</label>
-                                    <input className="w-full p-3 border border-line rounded-xl outline-none focus:border-accent" placeholder="例如：妮妮" value={newArt.artist} onChange={e=>setNewArt({...newArt, artist: e.target.value})} /></div>
-                                    
-                                    <div><label className="text-xs font-bold text-muted mb-1 block">作品類型</label>
-                                    <select className="w-full p-3 border border-line rounded-xl outline-none focus:border-accent" value={newArt.category} onChange={e=>setNewArt({...newArt, category: e.target.value})}>
-                                        <option>油畫</option><option>水彩</option><option>素描</option><option>多媒材</option>
-                                    </select></div>
-                                    
-                                    <div><label className="text-xs font-bold text-muted mb-1 block">圖片連結 (URL)</label>
-                                    <input className="w-full p-3 border border-line rounded-xl outline-none focus:border-accent" placeholder="請貼上圖片網址" value={newArt.imageUrl} onChange={e=>setNewArt({...newArt, imageUrl: e.target.value})} /></div>
-                                    
-                                    <div><label className="text-xs font-bold text-muted mb-1 block">作品心得</label>
-                                    <textarea className="w-full p-3 border border-line rounded-xl outline-none focus:border-accent h-24" placeholder="分享一下創作的心情..." value={newArt.description} onChange={e=>setNewArt({...newArt, description: e.target.value})} /></div>
-                                    
-                                    <div className="flex gap-3 pt-4">
-                                        <button onClick={handleAddArt} className="flex-1 py-4 bg-accent text-white font-black rounded-xl">確認上傳</button>
-                                        <button onClick={()=>setShowAddArt(false)} className="px-8 py-4 bg-stone-100 text-muted font-bold rounded-xl">取消</button>
-                                    </div>
-                                </div>
                             </motion.div>
                         </div>
                     )}
-                    
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {artworks.filter(a => a.createdBy === user.uid).map(art => (
-                            <div key={art.id} className="aspect-square rounded-2xl overflow-hidden border border-line relative group">
-                                <img src={art.imageUrl} className="w-full h-full object-cover" />
-                                <div className="absolute inset-0 bg-ink/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <span className="text-white font-bold text-xs">已發佈</span>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
                 </div>
             );
         };
@@ -531,4 +418,3 @@
     </script>
 </body>
 </html>
---- END OF FILE index.html ---
